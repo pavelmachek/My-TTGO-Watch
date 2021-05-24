@@ -28,8 +28,7 @@
 #include "callback.h"
 #include "timesync.h"
 
-static rtcctl_alarm_t alarm_data; 
-static time_t alarm_time = 0;
+#include "utils/alloc.h"
 
 volatile bool DRAM_ATTR rtc_irq_flag = false;
 portMUX_TYPE DRAM_ATTR RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
@@ -43,8 +42,12 @@ void rtcctl_load_data( void );
 void rtcctl_store_data( void );
 
 callback_t *rtcctl_callback = NULL;
+rtcctl_alarm_table_t rttctl_alarm_table;
 
 void rtcctl_setup( void ) {
+
+    rttctl_alarm_table.entrys = 0;
+    rttctl_alarm_table.rtcctl_alarm = NULL;
 
     pinMode( RTC_INT_PIN, INPUT_PULLUP);
     attachInterrupt( RTC_INT_PIN, &rtcctl_irq, FALLING );
@@ -52,50 +55,48 @@ void rtcctl_setup( void ) {
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , rtcctl_powermgm_event_cb, "powermgm rtcctl" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, rtcctl_powermgm_loop_cb, "powermgm rtcctl loop" );
     timesync_register_cb( TIME_SYNC_OK, rtcctl_timesync_event_cb, "timesync rtcctl" );
-
-    rtcctl_load_data();
 }
 
 bool rtcctl_send_event_cb( EventBits_t event ) {
     return( callback_send( rtcctl_callback, event, (void*)NULL ) );
 }
 
-static bool is_enabled( void ) {
-    return alarm_data.enabled;
-}
+rtcctl_alarm_t *rtcctl_add_alarm_entry( void ) {
+    /**
+     * increase entry counter
+     */
+    rttctl_alarm_table.entrys++;
 
-bool is_any_day_enabled( void ) {
-    for (int index = 0; index < DAYS_IN_WEEK; ++index){
-        if (alarm_data.week_days[index])
-            return true; 
+    /**
+     * if it not the first entry, realloc
+     * ot malloc the first block
+     */
+    if ( rttctl_alarm_table.rtcctl_alarm ) {
+        rtcctl_alarm_t *rtcctl_alarm = ( rtcctl_alarm_t *)REALLOC( rttctl_alarm_table.rtcctl_alarm, sizeof( rtcctl_alarm_t ) * rttctl_alarm_table.entrys );
+        if ( rtcctl_alarm ) {
+            rttctl_alarm_table.rtcctl_alarm = rtcctl_alarm;
+            log_i("realloc rtcctl_alarm %p", rttctl_alarm_table.rtcctl_alarm );
+        }
+        else {
+            log_e("error while realloc rtcctl_alarm");
+            while( true );
+        }
     }
-    return false;
-}
+    else {
+        rttctl_alarm_table.rtcctl_alarm = ( rtcctl_alarm_t *)MALLOC( sizeof( rtcctl_alarm_t ) );
+        if ( rttctl_alarm_table.rtcctl_alarm ) {
+            log_i("malloc rtcctl_alarm %p", rttctl_alarm_table.rtcctl_alarm );
+        }
+        else {
+            log_e("error while malloc rtcctl_alarm");
+            while( true );
+        }
+    }
 
-static bool is_day_checked( int wday ) {
-    // No day checked mean ALL days
-    return alarm_data.week_days[wday] || !is_any_day_enabled();
+    rttctl_alarm_table.rtcctl_alarm[ rttctl_alarm_table.entrys - 1 ].enable = false;
+    return( &rttctl_alarm_table.rtcctl_alarm[ rttctl_alarm_table.entrys - 1 ] );
 }
-
-time_t find_next_alarm_day( int day_of_week, time_t now ) {
-    //it is expected that test if any day is enabled has been performed
-    
-    time_t ret_val = now;
-    int wday_index = day_of_week;
-    do {
-        ret_val += 60 * 60 * 24; //number of seconds in day
-        if (++wday_index == DAYS_IN_WEEK){
-            wday_index = 0;
-        } 
-        if (is_day_checked( wday_index )){
-            return ret_val;
-        }        
-    } while (wday_index != day_of_week);
-    
-    return ret_val; //the same day of next week
-}
-
-void set_next_alarm( void ) {
+/*
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     if ( !is_enabled() ) {
@@ -129,21 +130,7 @@ void set_next_alarm( void ) {
     // it is better define alarm by day in month rather than weekday. This way will be work-around an error in pcf8563 source and will avoid eaising alarm when there is only one alarm in the week (today) and alarm time is set to now
     ttgo->rtc->setAlarm( alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday, PCF8563_NO_ALARM );
     rtcctl_send_event_cb( RTCCTL_ALARM_TERM_SET );
-}
-
-void rtcctl_set_next_alarm( void ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
-
-    if (alarm_data.enabled){
-        ttgo->rtc->disableAlarm();
-    }
-
-    set_next_alarm();
-    
-    if (alarm_data.enabled){
-        ttgo->rtc->enableAlarm();
-    }
-}
+*/
 
 bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
@@ -189,7 +176,6 @@ bool rtcctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
 bool rtcctl_timesync_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case TIME_SYNC_OK:
-            rtcctl_set_next_alarm();
             break;
     }
     return( true );
@@ -204,52 +190,4 @@ bool rtcctl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const c
         }
     }    
     return( callback_register( rtcctl_callback, event, callback_func, id ) );
-}
-
-void rtcctl_load_data( void ) {
-    rtcctl_alarm_t stored_data;
-    stored_data.load();
-    rtcctl_set_alarm(&stored_data);
-}
-
-void rtcctl_store_data( void ) {
-    alarm_data.save();
-}
-
-void rtcctl_set_alarm( rtcctl_alarm_t *data ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
-    bool was_enabled = alarm_data.enabled;
-    if (was_enabled){
-        ttgo->rtc->disableAlarm();
-    }
-    alarm_data = *data;
-    rtcctl_store_data();
-
-    set_next_alarm();
-
-    if (was_enabled && !alarm_data.enabled){
-        //already disabled
-        rtcctl_send_event_cb( RTCCTL_ALARM_DISABLED );
-    }
-    else if (was_enabled && alarm_data.enabled){
-        ttgo->rtc->enableAlarm();
-        //nothing actually changed;
-    }
-    else if (!was_enabled && alarm_data.enabled){
-        ttgo->rtc->enableAlarm();
-        rtcctl_send_event_cb( RTCCTL_ALARM_ENABLED );   
-    }    
-}
-
-rtcctl_alarm_t *rtcctl_get_alarm_data( void ) {
-    return &alarm_data;
-}
-
-int rtcctl_get_next_alarm_week_day( void ) {
-    if (!is_enabled()){
-        return RTCCTL_ALARM_NOT_SET;
-    }
-    tm alarm_tm;
-    localtime_r(&alarm_time, &alarm_tm);
-    return alarm_tm.tm_wday;
 }

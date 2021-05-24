@@ -293,13 +293,7 @@ void statusbar_setup( void )
     statusbar_hide_icon( STATUSBAR_BLUETOOTH );
     statusbar_hide_icon( STATUSBAR_VOLUME );
     statusbar_hide_icon( STATUSBAR_GPS );
-
-    if ( rtcctl_get_alarm_data()->enabled ) {
-        statusbar_show_icon( STATUSBAR_ALARM );
-    }
-    else {
-        statusbar_hide_icon( STATUSBAR_ALARM );
-    }
+    statusbar_hide_icon( STATUSBAR_ALARM );
 
     statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
 

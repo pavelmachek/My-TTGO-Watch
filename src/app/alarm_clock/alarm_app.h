@@ -1,8 +1,8 @@
 /****************************************************************************
- *   Copyright  2020  Jakub Vesely
- *   Email: jakub_vesely@seznam.cz
+ *   Copyright  2021  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
-
+ 
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,10 +18,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#pragma once
-#include <TTGO.h>
-#include <hardware/rtcctl.h>
+#ifndef _ALARM_APP_H
+    #define _ALARM_APP_H
 
-void alarm_clock_main_setup( uint32_t tile_num );
-void alarm_clock_main_set_data_to_display(rtcctl_alarm_t *alarm_data, bool clock_24);
-rtcctl_alarm_t * alarm_clock_main_get_data_to_store();
+    #include <TTGO.h>
+
+    void alarm_app_setup( void );
+
+#endif // _ALARM_APP_H

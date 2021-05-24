@@ -32,7 +32,7 @@
 
 #include "app/weather/weather.h"
 #include "app/stopwatch/stopwatch_app.h"
-#include "app/alarm_clock/alarm_clock.h"
+#include "app/alarm_clock/alarm_app.h"
 #include "app/sailing/sailing.h"
 #include "app/osmand/osmand_app.h"
 #include "app/IRController/IRController.h"
@@ -69,7 +69,7 @@ void setup() {
     osmmap_app_setup();
     weather_app_setup();
     stopwatch_app_setup();
-    alarm_clock_setup();
+    alarm_app_setup();
     activity_app_setup();
     calendar_app_setup();
     gps_status_setup();
