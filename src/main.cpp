@@ -49,6 +49,7 @@ void setup() {
     /**
      * apps here
      */
+#if 0    
     osmmap_app_setup();
     weather_app_setup();
     stopwatch_app_setup();
@@ -62,11 +63,14 @@ void setup() {
     osmand_app_setup();
     fxrates_app_setup();
     powermeter_app_setup();
+#endif    
     example_app_setup();
+#if 0
     FindPhone_setup();
     wifimon_app_setup();
     calc_app_setup();
     kodi_remote_app_setup();
+#endif
     /**
      * post hardware setup
      */
