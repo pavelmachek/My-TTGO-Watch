@@ -45,6 +45,7 @@ lv_obj_t *example_app_main_tile = NULL;
 lv_task_t * _example_app_task;
 
 LV_IMG_DECLARE(refresh_32px);
+LV_FONT_DECLARE(Ubuntu_32px);
 LV_FONT_DECLARE(Ubuntu_72px);
 
 static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -66,7 +67,7 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_obj_align(setup_btn, example_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
 
     lv_style_copy( &example_app_main_style, APP_STYLE );
-    lv_style_set_text_font( &example_app_main_style, LV_STATE_DEFAULT, &Ubuntu_72px);
+    lv_style_set_text_font( &example_app_main_style, LV_STATE_DEFAULT, &Ubuntu_32px);
     lv_obj_add_style( example_app_main_tile, LV_OBJ_PART_MAIN, &example_app_main_style );
     
     test_label = lv_label_create( example_app_main_tile, NULL);
@@ -94,6 +95,16 @@ static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     }
 }
 
+char *skip_to(char *s, int c) {
+    char *t;
+
+    t = strchr(s, c);
+    if (!t)
+    	return s;
+    return t+1;
+}
+  
+
 void fetch_url() {
   //char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/decoded/LKPR.TXT";
     char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/stations/LKPR.TXT";
@@ -103,6 +114,25 @@ void fetch_url() {
     uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
 
     printf("Got it... %d bytes, %s\n", uri_load_dsc->size, uri_load_dsc->data);
+
+    char *data = (char *) uri_load_dsc->data;
+    data[uri_load_dsc->size] = 0; /* FIXME */
+    char *metar = skip_to(data, '\n');
+
+
+    // LKPR 122000Z 27005KT CAVOK 05/03 Q1015 NOSIG
+
+    metar = skip_to(metar, ' ');
+    metar = skip_to(metar, ' ');
+
+    char *s = metar;
+    while (*s) {
+    	if (*s == ' ')
+	    *s = '\n';
+	s++;
+    }
+
+    lv_label_set_text(test_label, metar);
 }
 
 void example_app_task( lv_task_t * task ) {
@@ -111,7 +141,7 @@ void example_app_task( lv_task_t * task ) {
 
     printf("Tick: %d\n", time);
     sprintf(buf, "hell %d\nfoo\nbar\n", time++);
-    lv_label_set_text( test_label, buf);
+    lv_label_set_text(test_label, buf);
 
     fetch_url();
 }
