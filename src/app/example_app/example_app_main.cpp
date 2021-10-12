@@ -1,6 +1,7 @@
 /****************************************************************************
  *   Aug 3 12:17:11 2020
  *   Copyright  2020  Dirk Brosswick
+ *   Copyright  2021  Pavel Machek
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
  
@@ -48,6 +49,10 @@ static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void example_app_task( lv_task_t * task );
 
+lv_style_t example_app_main_style;
+
+lv_obj_t *test_label = NULL;
+
 void example_app_main_setup( uint32_t tile_num ) {
 
     example_app_main_tile = mainbar_get_tile_obj( tile_num );
@@ -57,6 +62,16 @@ void example_app_main_setup( uint32_t tile_num ) {
 
     lv_obj_t * setup_btn = wf_add_setup_button( example_app_main_tile, enter_example_app_setup_event_cb );
     lv_obj_align(setup_btn, example_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
+
+    lv_style_copy( &example_app_main_style, APP_STYLE );
+    lv_style_set_text_font( &example_app_main_style, LV_STATE_DEFAULT, &Ubuntu_72px);
+    lv_obj_add_style( example_app_main_tile, LV_OBJ_PART_MAIN, &example_app_main_style );
+    
+    test_label = lv_label_create( example_app_main_tile, NULL);
+    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_main_style  );
+    lv_label_set_text( test_label, "hello world");
+    lv_obj_align( test_label, example_app_main_tile, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    
 
     // create an task that runs every secound
     _example_app_task = lv_task_create( example_app_task, 1000, LV_TASK_PRIO_MID, NULL );
