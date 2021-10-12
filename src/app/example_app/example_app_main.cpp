@@ -72,11 +72,11 @@ void example_app_main_setup( uint32_t tile_num ) {
     test_label = lv_label_create( example_app_main_tile, NULL);
     lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_main_style  );
     lv_label_set_text( test_label, "world");
-    lv_obj_align( test_label, example_app_main_tile, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    lv_obj_align( test_label, example_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
     
 
     // create an task that runs every secound
-    _example_app_task = lv_task_create( example_app_task, 1000, LV_TASK_PRIO_MID, NULL );
+    _example_app_task = lv_task_create( example_app_task, 5000, LV_TASK_PRIO_MID, NULL );
 }
 
 static void enter_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -110,7 +110,7 @@ void example_app_task( lv_task_t * task ) {
     char buf[1024];
 
     printf("Tick: %d\n", time);
-    sprintf(buf, "hell %d", time++);
+    sprintf(buf, "hell %d\nfoo\nbar\n", time++);
     lv_label_set_text( test_label, buf);
 
     fetch_url();
