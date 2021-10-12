@@ -69,7 +69,7 @@ void example_app_main_setup( uint32_t tile_num ) {
     
     test_label = lv_label_create( example_app_main_tile, NULL);
     lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_main_style  );
-    lv_label_set_text( test_label, "hello world");
+    lv_label_set_text( test_label, "world");
     lv_obj_align( test_label, example_app_main_tile, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     
 
@@ -93,5 +93,9 @@ static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
 }
 
 void example_app_task( lv_task_t * task ) {
-    // put your code her
+    static int time;
+    char buf[1024];
+
+    sprintf(buf, "hell %d", time++);
+    lv_label_set_text( test_label, buf);
 }
