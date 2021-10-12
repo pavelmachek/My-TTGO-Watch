@@ -114,22 +114,28 @@ void fetch_url() {
     uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
 
     printf("Got it... %d bytes, %s\n", uri_load_dsc->size, uri_load_dsc->data);
+#define SIZE 1024
+    char data[SIZE];
+    int s = uri_load_dsc->size;
+    if (s > SIZE-1)
+        s = SIZE-1;
 
-    char *data = (char *) uri_load_dsc->data;
-    data[uri_load_dsc->size] = 0; /* FIXME */
+    memcpy(data, uri_load_dsc->data, s);
+    data[s] = 0;
     char *metar = skip_to(data, '\n');
-
 
     // LKPR 122000Z 27005KT CAVOK 05/03 Q1015 NOSIG
 
     metar = skip_to(metar, ' ');
     metar = skip_to(metar, ' ');
 
+    {
     char *s = metar;
     while (*s) {
     	if (*s == ' ')
 	    *s = '\n';
 	s++;
+    }
     }
 
     lv_label_set_text(test_label, metar);
