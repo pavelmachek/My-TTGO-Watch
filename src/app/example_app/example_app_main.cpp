@@ -32,6 +32,8 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
+#include "utils/uri_load/uri_load.h"
+
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
 #else
@@ -92,10 +94,24 @@ static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     }
 }
 
+void fetch_url() {
+  //char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/decoded/LKPR.TXT";
+    char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/stations/LKPR.TXT";
+
+    printf("Loading...\n");
+    
+    uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
+
+    printf("Got it... %d bytes, %s\n", uri_load_dsc->size, uri_load_dsc->data);
+}
+
 void example_app_task( lv_task_t * task ) {
     static int time;
     char buf[1024];
 
+    printf("Tick: %d\n", time);
     sprintf(buf, "hell %d", time++);
     lv_label_set_text( test_label, buf);
+
+    fetch_url();
 }
