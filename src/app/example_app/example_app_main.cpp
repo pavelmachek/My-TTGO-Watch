@@ -25,6 +25,8 @@
 #include "example_app.h"
 #include "example_app_main.h"
 
+#include "hardware/touch.h"
+
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
@@ -56,6 +58,38 @@ lv_style_t example_app_main_style;
 
 lv_obj_t *test_label = NULL;
 
+lv_obj_t *big_btn = NULL;
+
+bool example_button_cb( EventBits_t event, void *arg ) {
+  printf("button callback\n");
+    switch( event ) {
+    case BUTTON_LEFT:   printf("left button\n");
+                            break;
+    case BUTTON_RIGHT:  printf("right button\n");
+                            break;
+    }
+    return( true );
+}
+
+bool example_app_touch_event_cb( EventBits_t event, void *arg ) {
+  printf("touch cb %d\n", event);
+    switch( event ) {
+        case( TOUCH_UPDATE ):
+            break;
+    }
+    return( false );
+}
+
+static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
+  printf("big_btn\n");  
+    switch( event ) {
+        case( LV_EVENT_SHORT_CLICKED ): 
+                                        break;
+        case( LV_EVENT_LONG_PRESSED ):  
+                                        break;
+    }    
+}
+
 void example_app_main_setup( uint32_t tile_num ) {
 
     example_app_main_tile = mainbar_get_tile_obj( tile_num );
@@ -69,15 +103,25 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_style_copy( &example_app_main_style, APP_STYLE );
     lv_style_set_text_font( &example_app_main_style, LV_STATE_DEFAULT, &Ubuntu_32px);
     lv_obj_add_style( example_app_main_tile, LV_OBJ_PART_MAIN, &example_app_main_style );
-    
+
     test_label = lv_label_create( example_app_main_tile, NULL);
     lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_main_style  );
     lv_label_set_text( test_label, "world");
     lv_obj_align( test_label, example_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
     
+    big_btn = lv_btn_create( example_app_main_tile, NULL );
+    lv_obj_set_width( big_btn, lv_disp_get_hor_res( NULL ) );
+    lv_obj_set_height( big_btn, lv_disp_get_ver_res( NULL ) - 30);
+    lv_obj_add_protect( big_btn, LV_PROTECT_CLICK_FOCUS );
+    lv_obj_add_style( big_btn, LV_OBJ_PART_MAIN, &example_app_main_style );
+    lv_obj_align( big_btn, example_app_main_tile, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_set_event_cb( big_btn, exit_big_app_tile_event_cb );
 
-    // create an task that runs every secound
+    // FIXME: should use _activate_cb
     _example_app_task = lv_task_create( example_app_task, 5000, LV_TASK_PRIO_MID, NULL );
+
+    mainbar_add_tile_button_cb( tile_num, example_button_cb );
+    touch_register_cb( TOUCH_UPDATE , example_app_touch_event_cb, "osm touch" );
 }
 
 static void enter_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -94,6 +138,7 @@ static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
                                         break;
     }
 }
+
 
 char *skip_to(char *s, int c) {
     char *t;
@@ -149,5 +194,5 @@ void example_app_task( lv_task_t * task ) {
     sprintf(buf, "hell %d\nfoo\nbar\n", time++);
     lv_label_set_text(test_label, buf);
 
-    fetch_url();
+    //fetch_url();
 }
