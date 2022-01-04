@@ -49,7 +49,6 @@ void setup() {
     /**
      * apps here
      */
-#if 0    
     osmmap_app_setup();
     weather_app_setup();
     stopwatch_app_setup();
@@ -57,6 +56,7 @@ void setup() {
     activity_app_setup();
     calendar_app_setup();
     mail_app_setup();
+#if 0    
     gps_status_setup();
     IRController_setup();
     sailing_setup();
@@ -68,7 +68,9 @@ void setup() {
 #if 0
     FindPhone_setup();
     wifimon_app_setup();
+#endif
     calc_app_setup();
+#if 0
     kodi_remote_app_setup();
 #endif
     /**

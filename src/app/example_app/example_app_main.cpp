@@ -117,9 +117,11 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_obj_align( big_btn, example_app_main_tile, LV_ALIGN_CENTER, 0, 0 );
     lv_obj_set_event_cb( big_btn, exit_big_app_tile_event_cb );
 
+#if 0
     // FIXME: should use _activate_cb
     _example_app_task = lv_task_create( example_app_task, 5000, LV_TASK_PRIO_MID, NULL );
-
+#endif
+    
     mainbar_add_tile_button_cb( tile_num, example_button_cb );
     touch_register_cb( TOUCH_UPDATE , example_app_touch_event_cb, "osm touch" );
 }
@@ -189,10 +191,12 @@ void fetch_url() {
 void example_app_task( lv_task_t * task ) {
     static int time;
     char buf[1024];
-
+#if 0
     printf("Tick: %d\n", time);
     sprintf(buf, "hell %d\nfoo\nbar\n", time++);
     lv_label_set_text(test_label, buf);
-
-    //fetch_url();
+#endif
+#if 0
+    fetch_url();
+#endif
 }
