@@ -101,14 +101,17 @@ void example_hibernate_cb( void ) {
 }
 
 void example_app_main_setup( uint32_t tile_num ) {
+    int sx = lv_disp_get_hor_res( NULL ), sy = lv_disp_get_ver_res( NULL );
 
     example_app_main_tile = mainbar_get_tile_obj( tile_num );
 
+#if 0    
     lv_obj_t * exit_btn = wf_add_exit_button( example_app_main_tile, exit_example_app_main_event_cb );
     lv_obj_align(exit_btn, example_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
 
     lv_obj_t * setup_btn = wf_add_setup_button( example_app_main_tile, enter_example_app_setup_event_cb );
     lv_obj_align(setup_btn, example_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
+#endif
 
     lv_style_copy( &example_app_main_style, APP_STYLE );
     lv_style_set_text_font( &example_app_main_style, LV_STATE_DEFAULT, &Ubuntu_32px);
@@ -116,12 +119,14 @@ void example_app_main_setup( uint32_t tile_num ) {
 
     test_label = lv_label_create( example_app_main_tile, NULL);
     lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_main_style  );
-    lv_label_set_text( test_label, "world");
-    lv_obj_align( test_label, example_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
+    lv_label_set_text( test_label, "Even wristwatch\nshould run\nfree software.\nEsp32 means it\nis small compu-\nter really.");
+    //    lv_obj_align( test_label, example_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
+    lv_obj_set_width( test_label, sx);
+    lv_obj_set_height( test_label, sy);
+    lv_obj_set_pos( test_label, 0, 0);
 
     {
       int x, y;
-      int sx = lv_disp_get_hor_res( NULL ), sy = lv_disp_get_ver_res( NULL );
       for (x=0; x<6; x++)
 	for (y=0; y<6; y++) {
 	  big_btn = lv_btn_create( example_app_main_tile, NULL );
