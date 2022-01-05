@@ -50,6 +50,8 @@ LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_32px);
 LV_FONT_DECLARE(Ubuntu_72px);
 
+lv_obj_t *objects[128];
+
 static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void example_app_task( lv_task_t * task );
@@ -80,8 +82,24 @@ bool example_app_touch_event_cb( EventBits_t event, void *arg ) {
     return( false );
 }
 
+static void clear_screen(void)
+{
+  int i;
+
+  for (i=0; i<sizeof(objects)/sizeof(*objects); i++) {
+    if (objects[i]) {
+      lv_obj_del(objects[i]);
+      objects[i] = NULL;
+    }
+  }
+    
+}
+
 static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
-  printf("obj @ %d %d\n", obj->coords.x1, obj->coords.y1);
+    int x, y;
+    x = obj->coords.x1;
+    y = obj->coords.y1;
+    printf("obj @ %d %d\n", x, y);
     switch( event ) {
         case( LV_EVENT_SHORT_CLICKED ):
 	    printf("big_btn -- short\n"); fflush(stdout);
@@ -89,7 +107,11 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
         case( LV_EVENT_LONG_PRESSED ):
 	    printf("big_btn -- long\n"); fflush(stdout);	  
                                         break;
-    }    
+    }
+
+    if (x < 80) {
+        clear_screen();
+    }
 }
 
 void example_activate_cb( void ) {
@@ -124,6 +146,8 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_obj_set_width( test_label, sx);
     lv_obj_set_height( test_label, sy);
     lv_obj_set_pos( test_label, 0, 0);
+
+    objects[0] = test_label;
 
     {
       int x, y;
