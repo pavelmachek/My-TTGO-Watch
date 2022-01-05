@@ -81,6 +81,7 @@ bool example_app_touch_event_cb( EventBits_t event, void *arg ) {
 }
 
 static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
+  printf("obj @ %d %d\n", obj->coords.x1, obj->coords.y1);
     switch( event ) {
         case( LV_EVENT_SHORT_CLICKED ):
 	    printf("big_btn -- short\n"); fflush(stdout);
@@ -117,16 +118,24 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_main_style  );
     lv_label_set_text( test_label, "world");
     lv_obj_align( test_label, example_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
-    
-    big_btn = lv_btn_create( example_app_main_tile, NULL );
-    lv_obj_set_width( big_btn, lv_disp_get_hor_res( NULL ) );
-    lv_obj_set_height( big_btn, lv_disp_get_ver_res( NULL ) - 30);
-    lv_obj_add_protect( big_btn, LV_PROTECT_CLICK_FOCUS );
-    lv_obj_add_style( big_btn, LV_OBJ_PART_MAIN, &example_app_main_style );
-    lv_obj_align( big_btn, example_app_main_tile, LV_ALIGN_CENTER, 0, 0 );
 
+    {
+      int x, y;
+      int sx = lv_disp_get_hor_res( NULL ), sy = lv_disp_get_ver_res( NULL );
+      for (x=0; x<6; x++)
+	for (y=0; y<6; y++) {
+	  big_btn = lv_btn_create( example_app_main_tile, NULL );
+	  lv_obj_set_width( big_btn, sx/6 );
+	  lv_obj_set_height( big_btn, sy/6 );
+	  lv_obj_set_pos( big_btn, (x*sx)/6, (y*sy)/6 );
+	  lv_obj_add_protect( big_btn, LV_PROTECT_CLICK_FOCUS );
+	  lv_obj_add_style( big_btn, LV_OBJ_PART_MAIN, &example_app_main_style );
+	  lv_obj_set_event_cb( big_btn, exit_big_app_tile_event_cb );
+	  
+	}
+    }
+    
 #if 1
-    lv_obj_set_event_cb( big_btn, exit_big_app_tile_event_cb );
 
     // FIXME: should use _activate_cb
     _example_app_task = lv_task_create( example_app_task, 5000, LV_TASK_PRIO_MID, NULL );
