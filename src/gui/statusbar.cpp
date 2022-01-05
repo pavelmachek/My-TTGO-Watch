@@ -29,6 +29,7 @@
 
 #include "statusbar.h"
 
+#include "hardware/timesync.h"
 #include "hardware/powermgm.h"
 #include "hardware/wifictl.h"
 #include "hardware/blectl.h"
@@ -520,7 +521,7 @@ bool statusbar_pmuctl_event_cb( EventBits_t event, void *arg ) {
 }
 
 bool statusbar_bmactl_event_cb( EventBits_t event, void *arg ) {
-    char stepcounter[16]="";
+    char stepcounter[32]="", time_str[16];
     /*
      * check if statusbar ready
      */
@@ -530,7 +531,8 @@ bool statusbar_bmactl_event_cb( EventBits_t event, void *arg ) {
     }
 
     switch( event ) {
-        case BMACTL_STEPCOUNTER:    snprintf( stepcounter, sizeof( stepcounter ), "%d", *(uint32_t *)arg );
+    case BMACTL_STEPCOUNTER:	    timesync_get_current_timestring( time_str, sizeof(time_str) );
+                                    snprintf( stepcounter, sizeof( stepcounter ), "%d steps %s", *(uint32_t *)arg, time_str );
                                     lv_label_set_text( statusbar_stepcounterlabel, stepcounter );
                                     break;
     }
