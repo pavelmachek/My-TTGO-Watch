@@ -115,15 +115,16 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_obj_add_protect( big_btn, LV_PROTECT_CLICK_FOCUS );
     lv_obj_add_style( big_btn, LV_OBJ_PART_MAIN, &example_app_main_style );
     lv_obj_align( big_btn, example_app_main_tile, LV_ALIGN_CENTER, 0, 0 );
+#if 0
     lv_obj_set_event_cb( big_btn, exit_big_app_tile_event_cb );
 
-#if 0
     // FIXME: should use _activate_cb
     _example_app_task = lv_task_create( example_app_task, 5000, LV_TASK_PRIO_MID, NULL );
 #endif
-    
+#if 0
     mainbar_add_tile_button_cb( tile_num, example_button_cb );
     touch_register_cb( TOUCH_UPDATE , example_app_touch_event_cb, "osm touch" );
+#endif
 }
 
 static void enter_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {

@@ -453,16 +453,17 @@ bool statusbar_displayctl_event_cb( EventBits_t event, void *arg ) {
 }
 
 static void statusbar_pmuctl_update_batt( int32_t percent, bool charging, bool plug) {
-    char level[8]="";
+    char level[16]="", time_str[16];
+    timesync_get_current_timestring( time_str, sizeof(time_str) );
 
     if ( percent >= 0 && percent <= 100 ) {
-        snprintf( level, sizeof( level ), "%d%%", percent );
+        snprintf( level, sizeof( level ), "%d%% %s", percent, time_str );
     }
     else if ( percent > 100 ) {
-        snprintf( level, sizeof( level ), "!%d%%", percent );
+        snprintf( level, sizeof( level ), "!%d%% %s", percent, time_str );
     }
     else {
-        snprintf( level, sizeof( level ), "?" );
+        snprintf( level, sizeof( level ), "%s ?", time_str );
         percent = 0;
     }
     lv_label_set_text( statusicon[  STATUSBAR_BATTERY_PERCENT ].icon, (const char *)level );
@@ -521,7 +522,7 @@ bool statusbar_pmuctl_event_cb( EventBits_t event, void *arg ) {
 }
 
 bool statusbar_bmactl_event_cb( EventBits_t event, void *arg ) {
-    char stepcounter[32]="", time_str[16];
+    char stepcounter[32]="";
     /*
      * check if statusbar ready
      */
@@ -531,8 +532,8 @@ bool statusbar_bmactl_event_cb( EventBits_t event, void *arg ) {
     }
 
     switch( event ) {
-    case BMACTL_STEPCOUNTER:	    timesync_get_current_timestring( time_str, sizeof(time_str) );
-                                    snprintf( stepcounter, sizeof( stepcounter ), "%d steps %s", *(uint32_t *)arg, time_str );
+    case BMACTL_STEPCOUNTER:	    
+                                    snprintf( stepcounter, sizeof( stepcounter ), "%d", *(uint32_t *)arg );
                                     lv_label_set_text( statusbar_stepcounterlabel, stepcounter );
                                     break;
     }
