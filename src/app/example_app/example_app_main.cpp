@@ -58,6 +58,8 @@ LV_FONT_DECLARE(Ubuntu_72px);
 int state;
 lv_obj_t *objects[128];
 
+static void run_weather(void);
+
 static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void example_app_task( lv_task_t * task );
@@ -157,6 +159,16 @@ struct display_list d_main[] = {
 	  .text = "[Remote]" },
 };
 
+struct display_list d_weather[] = {
+	{ .sx = 6*S, .sy = S,
+	  .mode = M_TEXT | M_SMALL,
+	  .text = "Weather report", },
+	{ .y = S, .sx = 6*S, .sy = 2*S,
+	  .mode = M_TEXT | M_SMALL,
+	  .text = "(weather goes here)" },
+};
+
+
 static void display(display_list *display, int num)
 {
     for (int i=0; i<num; i++) {
@@ -209,6 +221,7 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 		    break;
 	    case 2*S ... 4*S-1:
 		    state = S_WEATHER; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
+		    run_weather();
 		    break;
 	    case 4*S ... 6*S:
 		    state = S_REMOTE; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
@@ -315,7 +328,7 @@ char *skip_to(char *s, int c) {
 }
   
 
-void fetch_url() {
+static void run_weather(void) {
   //char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/decoded/LKPR.TXT";
     char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/stations/LKPR.TXT";
 
@@ -324,8 +337,9 @@ void fetch_url() {
     uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
 
     printf("Got it... %d bytes, %s\n", uri_load_dsc->size, uri_load_dsc->data); fflush(stdout);
+    clear_screen();
 #define SIZE 1024
-    char data[SIZE];
+    static char data[SIZE];
     int s = uri_load_dsc->size;
     if (s > SIZE-1)
         s = SIZE-1;
@@ -348,7 +362,8 @@ void fetch_url() {
     }
     }
 
-    lv_label_set_text(test_label, metar);
+    d_weather[1].text = data;
+    display(d_weather, sizeof(d_weather)/sizeof(*d_weather));
 }
 
 void example_app_task( lv_task_t * task ) {
