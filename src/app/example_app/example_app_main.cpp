@@ -136,7 +136,7 @@ struct display_list {
 
 #define S 40
 
-struct display_list display[] = {
+struct display_list d_about[] = {
 	{ .sx = 6*S, .sy = 2*S,
 	  .mode = M_TEXT | M_BIG,
 	  .text = "Hello,", },
@@ -150,7 +150,7 @@ struct display_list display[] = {
 	  .text = "Good luck :-)" },	
 };
 
-void display_list(display_list *display, int num)
+void display(display_list *display, int num)
 {
     for (int i=0; i<num; i++) {
 	    struct display_list *l = display+i;
@@ -216,7 +216,7 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_style_set_text_font( &example_app_big_style, LV_STATE_DEFAULT, &Ubuntu_72px);
     lv_obj_add_style( example_app_main_tile, LV_OBJ_PART_MAIN, &example_app_big_style );
 
-    display_list(display, sizeof(display)/sizeof(*display));
+    display(d_about, sizeof(d_about)/sizeof(*d_about));
 
     {
       int x, y;
