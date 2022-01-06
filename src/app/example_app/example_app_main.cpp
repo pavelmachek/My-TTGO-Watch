@@ -228,6 +228,7 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 		    break;
 	    }
 	    break;
+    case S_WEATHER:
     case S_ABOUT:
 	    state = S_MAIN; display(d_main, sizeof(d_main)/sizeof(*d_main));
 	    break;
