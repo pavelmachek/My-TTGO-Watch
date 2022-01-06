@@ -150,6 +150,33 @@ struct display_list display[] = {
 	  .text = "Good luck :-)" },	
 };
 
+void display_list(display_list *display, int num)
+{
+    for (int i=0; i<num; i++) {
+	    struct display_list *l = display+i;
+
+	    if (!l->mode & M_TEXT)
+		    continue;
+
+	    test_label = lv_label_create( example_app_main_tile, NULL);
+
+	    if (l->mode & M_BIG)
+		    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_big_style  );
+	    else if (l->mode & M_SMALL)
+		    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_small_style  );	    
+	    else
+		    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_main_style  );
+
+	    lv_label_set_text( test_label, l->text);
+    //    lv_obj_align( test_label, example_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
+	    lv_obj_set_width( test_label, l->sx);
+	    lv_obj_set_height( test_label, l->sy);
+	    lv_obj_set_pos( test_label, l->x, l->y);
+
+	    objects[i] = test_label;
+    }
+}
+
 void example_app_main_setup( uint32_t tile_num ) {
     int sx = lv_disp_get_hor_res( NULL ), sy = lv_disp_get_ver_res( NULL );
 
@@ -189,31 +216,8 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_style_set_text_font( &example_app_big_style, LV_STATE_DEFAULT, &Ubuntu_72px);
     lv_obj_add_style( example_app_main_tile, LV_OBJ_PART_MAIN, &example_app_big_style );
 
-    for (int i=0; i<sizeof(display)/sizeof(*display); i++) {
-	    display_list *l = display+i;
+    display_list(display, sizeof(display)/sizeof(*display));
 
-	    if (!l->mode & M_TEXT)
-		    continue;
-
-	    test_label = lv_label_create( example_app_main_tile, NULL);
-
-	    if (l->mode & M_BIG)
-		    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_big_style  );
-	    else if (l->mode & M_SMALL)
-		    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_small_style  );	    
-	    else
-		    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_main_style  );
-
-	    
-
-	    lv_label_set_text( test_label, l->text);
-    //    lv_obj_align( test_label, example_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
-	    lv_obj_set_width( test_label, l->sx);
-	    lv_obj_set_height( test_label, l->sy);
-	    lv_obj_set_pos( test_label, l->x, l->y);
-
-	    objects[i] = test_label;
-    }
     {
       int x, y;
       for (x=0; x<6; x++)
@@ -225,7 +229,6 @@ void example_app_main_setup( uint32_t tile_num ) {
 	  lv_obj_add_protect( big_btn, LV_PROTECT_CLICK_FOCUS );
 	  lv_obj_add_style( big_btn, LV_OBJ_PART_MAIN, &example_app_main_style );
 	  lv_obj_set_event_cb( big_btn, exit_big_app_tile_event_cb );
-	  
 	}
     }
     
