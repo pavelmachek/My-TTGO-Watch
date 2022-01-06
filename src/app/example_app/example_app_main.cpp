@@ -51,6 +51,11 @@ LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 LV_FONT_DECLARE(Ubuntu_72px);
 
+#define S_MAIN 0
+#define S_ABOUT 1
+#define S_WEATHER 2
+#define S_REMOTE 3
+int state;
 lv_obj_t *objects[128];
 
 static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -96,30 +101,11 @@ static void clear_screen(void)
     
 }
 
-static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    int x, y;
-    x = obj->coords.x1;
-    y = obj->coords.y1;
-    printf("obj @ %d %d\n", x, y);
-    switch( event ) {
-        case( LV_EVENT_SHORT_CLICKED ):
-	    printf("big_btn -- short\n"); fflush(stdout);
-                                        break;
-        case( LV_EVENT_LONG_PRESSED ):
-	    printf("big_btn -- long\n"); fflush(stdout);	  
-                                        break;
-    }
-
-    if (x < 80) {
-        clear_screen();
-    }
-}
-
-void example_activate_cb( void ) {
+static void example_activate_cb( void ) {
   printf("activate\n"); fflush(stdout);
 }
 
-void example_hibernate_cb( void ) {
+static void example_hibernate_cb( void ) {
   printf("hibernate\n"); fflush(stdout);
 }
 
@@ -147,10 +133,31 @@ struct display_list d_about[] = {
 	          "is a small computer." },
 	{ .y = 4*S, .sx = 6*S, .sy = 2*S,
 	  .mode = M_TEXT,
-	  .text = "Good luck :-)" },	
+	  .text = "Good luck :-)\n[Close]" },	
 };
 
-void display(display_list *display, int num)
+struct display_list d_wait[] = {
+	{ .sx = 6*S, .sy = 2*S,
+	  .mode = M_TEXT | M_BIG,
+	  .text = "Wait...", },
+};
+
+struct display_list d_main[] = {
+	{ .sx = 6*S, .sy = S,
+	  .mode = M_TEXT | M_SMALL,
+	  .text = "Main menu", },
+	{ .y = S, .sx = 6*S, .sy = 2*S,
+	  .mode = M_TEXT,
+	  .text = "[About]" },
+	{ .y = 3*S, .sx = 6*S, .sy = 2*S,
+	  .mode = M_TEXT,
+	  .text = "[Weather]" },
+	{ .y = 5*S, .sx = 6*S, .sy = 2*S,
+	  .mode = M_TEXT,
+	  .text = "[Remote]" },
+};
+
+static void display(display_list *display, int num)
 {
     for (int i=0; i<num; i++) {
 	    struct display_list *l = display+i;
@@ -174,6 +181,43 @@ void display(display_list *display, int num)
 	    lv_obj_set_pos( test_label, l->x, l->y);
 
 	    objects[i] = test_label;
+    }
+}
+
+static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    int x, y;
+    x = obj->coords.x1;
+    y = obj->coords.y1;
+    printf("obj @ %d %d\n", x, y);
+    switch( event ) {
+        case( LV_EVENT_SHORT_CLICKED ):
+	    printf("big_btn -- short\n"); fflush(stdout);
+                                        break;
+        case( LV_EVENT_LONG_PRESSED ):
+	    printf("big_btn -- long\n"); fflush(stdout);	  
+                                        break;
+    default:
+	    return;
+    }
+
+    clear_screen();
+    switch (state) {
+    case S_MAIN:
+	    switch (y) {
+	    case 0 ... 2*S-1:
+		    state = S_ABOUT; display(d_about, sizeof(d_about)/sizeof(*d_about));
+		    break;
+	    case 2*S ... 4*S-1:
+		    state = S_WEATHER; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
+		    break;
+	    case 4*S ... 6*S:
+		    state = S_REMOTE; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
+		    break;
+	    }
+	    break;
+    case S_ABOUT:
+	    state = S_MAIN; display(d_main, sizeof(d_main)/sizeof(*d_main));
+	    break;
     }
 }
 
@@ -216,7 +260,7 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_style_set_text_font( &example_app_big_style, LV_STATE_DEFAULT, &Ubuntu_72px);
     lv_obj_add_style( example_app_main_tile, LV_OBJ_PART_MAIN, &example_app_big_style );
 
-    display(d_about, sizeof(d_about)/sizeof(*d_about));
+    state = S_MAIN; display(d_main, sizeof(d_main)/sizeof(*d_main));    
 
     {
       int x, y;
