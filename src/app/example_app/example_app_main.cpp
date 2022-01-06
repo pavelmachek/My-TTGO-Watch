@@ -47,6 +47,7 @@ lv_obj_t *example_app_main_tile = NULL;
 lv_task_t * _example_app_task;
 
 LV_IMG_DECLARE(refresh_32px);
+LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 LV_FONT_DECLARE(Ubuntu_72px);
 
@@ -56,7 +57,7 @@ static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void example_app_task( lv_task_t * task );
 
-lv_style_t example_app_main_style;
+lv_style_t example_app_main_style,  example_app_big_style, example_app_small_style;
 
 lv_obj_t *test_label = NULL;
 
@@ -122,6 +123,33 @@ void example_hibernate_cb( void ) {
   printf("hibernate\n"); fflush(stdout);
 }
 
+#define M_TEXT 1
+#define M_BIG 2
+#define M_SMALL 4
+
+struct display_list {
+  int x, y, sx, sy;
+  int mode;
+  char *text;
+  struct display_list *next;
+};
+
+#define S 40
+
+struct display_list display[] = {
+	{ .sx = 6*S, .sy = 2*S,
+	  .mode = M_TEXT | M_BIG,
+	  .text = "Hello,", },
+	{ .y = 2*S, .sx = 6*S, .sy = 3*S,
+	  .mode = M_TEXT | M_SMALL,
+	  .text = "Even wristwatch should run free\n"
+	          "software. Esp32 means it really\n"
+	          "is a small computer." },
+	{ .y = 4*S, .sx = 6*S, .sy = 2*S,
+	  .mode = M_TEXT,
+	  .text = "Good luck :-)" },	
+};
+
 void example_app_main_setup( uint32_t tile_num ) {
     int sx = lv_disp_get_hor_res( NULL ), sy = lv_disp_get_ver_res( NULL );
 
@@ -135,8 +163,9 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_obj_align(setup_btn, example_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
 #endif
 
+#if 0
     lv_style_copy( &example_app_main_style, APP_STYLE );
-    lv_style_set_text_font( &example_app_main_style, LV_STATE_DEFAULT, &Ubuntu_32px);
+    lv_style_set_text_font( &example_app_main_style, LV_STATE_DEFAULT, &Ubuntu_16px);
     lv_obj_add_style( example_app_main_tile, LV_OBJ_PART_MAIN, &example_app_main_style );
 
     test_label = lv_label_create( example_app_main_tile, NULL);
@@ -146,9 +175,45 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_obj_set_width( test_label, sx);
     lv_obj_set_height( test_label, sy);
     lv_obj_set_pos( test_label, 0, 0);
+#endif
 
-    objects[0] = test_label;
+    lv_style_copy( &example_app_main_style, APP_STYLE );
+    lv_style_set_text_font( &example_app_main_style, LV_STATE_DEFAULT, &Ubuntu_32px);
+    lv_obj_add_style( example_app_main_tile, LV_OBJ_PART_MAIN, &example_app_main_style );
 
+    lv_style_copy( &example_app_small_style, APP_STYLE );
+    lv_style_set_text_font( &example_app_small_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+    lv_obj_add_style( example_app_main_tile, LV_OBJ_PART_MAIN, &example_app_small_style );
+
+    lv_style_copy( &example_app_big_style, APP_STYLE );
+    lv_style_set_text_font( &example_app_big_style, LV_STATE_DEFAULT, &Ubuntu_72px);
+    lv_obj_add_style( example_app_main_tile, LV_OBJ_PART_MAIN, &example_app_big_style );
+
+    for (int i=0; i<sizeof(display)/sizeof(*display); i++) {
+	    display_list *l = display+i;
+
+	    if (!l->mode & M_TEXT)
+		    continue;
+
+	    test_label = lv_label_create( example_app_main_tile, NULL);
+
+	    if (l->mode & M_BIG)
+		    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_big_style  );
+	    else if (l->mode & M_SMALL)
+		    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_small_style  );	    
+	    else
+		    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_main_style  );
+
+	    
+
+	    lv_label_set_text( test_label, l->text);
+    //    lv_obj_align( test_label, example_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
+	    lv_obj_set_width( test_label, l->sx);
+	    lv_obj_set_height( test_label, l->sy);
+	    lv_obj_set_pos( test_label, l->x, l->y);
+
+	    objects[i] = test_label;
+    }
     {
       int x, y;
       for (x=0; x<6; x++)
