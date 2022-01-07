@@ -356,7 +356,8 @@ char *skip_to(char *s, int c) {
 
 static void run_weather_task( lv_task_t * task ) {
   //char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/decoded/LKPR.TXT";
-    char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/stations/LKPR.TXT";
+	//char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/stations/LKPR.TXT";
+	char url[] = "http://10.0.0.9:8000/LKPR.TXT";
 
     printf("Loading...\n"); fflush(stdout);
     
