@@ -352,15 +352,22 @@ char *skip_to(char *s, int c) {
     	return s;
     return t+1;
 }
-  
 
-static void run_weather(void) {
+
+static void run_weather_task( lv_task_t * task ) {
   //char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/decoded/LKPR.TXT";
     char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/stations/LKPR.TXT";
 
     printf("Loading...\n"); fflush(stdout);
     
     uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
+
+    if (!uri_load_dsc) {
+	    printf("Some kind of error loading url\n");
+	    d_weather[1].text = "Error loading url";
+	    display(d_weather, sizeof(d_weather)/sizeof(*d_weather));
+	    return;
+    }
 
     printf("Got it... %d bytes, %s\n", uri_load_dsc->size, uri_load_dsc->data); fflush(stdout);
     clear_screen();
@@ -423,6 +430,10 @@ static int dl_parse(struct display_list *res, int num, const char *arg)
 		t = end+1;
 	}
 	return i;
+}
+
+static void run_weather(void) {
+	lv_task_create( run_weather_task, 5000, LV_TASK_PRIO_MID, NULL );
 }
 
 void example_app_task( lv_task_t * task ) {
