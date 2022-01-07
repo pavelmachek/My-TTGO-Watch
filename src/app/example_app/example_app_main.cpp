@@ -1,7 +1,7 @@
 /****************************************************************************
  *   Aug 3 12:17:11 2020
  *   Copyright  2020  Dirk Brosswick
- *   Copyright  2021  Pavel Machek
+ *   Copyright  2021-2022  Pavel Machek
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
  
@@ -119,11 +119,11 @@ struct display_list {
   int x, y, sx, sy;
   int mode;
   char *text;
-  struct display_list *next;
 };
 
 #define S 40
 
+#if 0
 struct display_list d_about[] = {
 	{ .sx = 6*S, .sy = 2*S,
 	  .mode = M_TEXT | M_BIG,
@@ -167,7 +167,24 @@ struct display_list d_weather[] = {
 	  .mode = M_TEXT | M_SMALL,
 	  .text = "(weather goes here)" },
 };
+#else
+struct display_list d_about[4], d_main[4], d_weather[4], d_wait[4];
 
+static int dl_parse(struct display_list *res, int num, char *t);
+
+static void dl_parse_all(void)
+{
+	int r;
+	r = dl_parse(d_main, 4, "0 0 240 40 5 Main menu");
+	if (r < 0) {
+		printf("Could not parse main menu.\n");
+		fflush(stdout);
+	}
+	r = dl_parse(d_about, 4, "0 0 240 40 5 About");
+}
+
+
+#endif
 
 static void display(display_list *display, int num)
 {
@@ -261,6 +278,8 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_obj_set_height( test_label, sy);
     lv_obj_set_pos( test_label, 0, 0);
 #endif
+
+    dl_parse_all();
 
     lv_style_copy( &example_app_main_style, APP_STYLE );
     lv_style_set_text_font( &example_app_main_style, LV_STATE_DEFAULT, &Ubuntu_32px);
@@ -365,6 +384,34 @@ static void run_weather(void) {
 
     d_weather[1].text = data;
     display(d_weather, sizeof(d_weather)/sizeof(*d_weather));
+}
+
+static int dl_parse(struct display_list *res, int num, char *t)
+{
+	int i = 0;
+	char *end;
+	printf("Parsing: %s\n", t); fflush(stdout);
+	while (*t) {
+		int r;
+		int num;
+		end = strchr(t, '\a');
+
+		r = sscanf(t, "%d%d%d%d%d%n", &res->x, &res->y, &res->sx, &res->sy, &res->mode, &num);
+		res->text = t+num;
+		
+		if (r != 6) {
+			printf("Could not parse: %s\n", t);
+			return -1;
+		}
+		printf("Parsed: %s\n", res->text); fflush(stdout);
+		i++; res++;
+		if (i == num)
+			return -1;
+		
+		if (!end)
+			return i;
+		t = end+1;
+	}
 }
 
 void example_app_task( lv_task_t * task ) {
