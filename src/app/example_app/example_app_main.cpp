@@ -58,7 +58,9 @@ LV_FONT_DECLARE(Ubuntu_72px);
 int state;
 lv_obj_t *objects[128];
 
-static void run_weather(void);
+static void run_weather_task( lv_task_t * task );
+static void run_remote_task( lv_task_t * task );
+
 
 static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -168,7 +170,7 @@ struct display_list d_weather[] = {
 	  .text = "(weather goes here)" },
 };
 #else
-struct display_list d_about[4], d_main[4], d_weather[4], d_wait[4];
+struct display_list d_about[4], d_main[4], d_weather[4], d_wait[4], d_remote[40];
 
 static int dl_parse(struct display_list *res, int num, const char *t);
 
@@ -244,16 +246,20 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 		    break;
 	    case 2*S ... 4*S-1:
 		    state = S_WEATHER; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
-		    run_weather();
+		    lv_task_create( run_weather_task, 5000, LV_TASK_PRIO_MID, NULL );
 		    break;
 	    case 4*S ... 6*S:
 		    state = S_REMOTE; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
+		    lv_task_create( run_remote_task, 5000, LV_TASK_PRIO_MID, NULL );
 		    break;
 	    }
 	    break;
     case S_WEATHER:
     case S_ABOUT:
 	    state = S_MAIN; display(d_main, sizeof(d_main)/sizeof(*d_main));
+	    break;
+    case S_REMOTE:
+	    lv_task_create( run_remote_task, 5000, LV_TASK_PRIO_MID, NULL );
 	    break;
     }
 }
@@ -353,7 +359,6 @@ char *skip_to(char *s, int c) {
     return t+1;
 }
 
-
 static void run_weather_task( lv_task_t * task ) {
   //char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/decoded/LKPR.TXT";
 	//char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/stations/LKPR.TXT";
@@ -398,6 +403,44 @@ static void run_weather_task( lv_task_t * task ) {
 
     d_weather[1].text = data;
     display(d_weather, sizeof(d_weather)/sizeof(*d_weather));
+}
+
+static void run_remote_task( lv_task_t * task ) {
+  //char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/decoded/LKPR.TXT";
+	//char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/stations/LKPR.TXT";
+	char url[] = "http://10.0.0.9:8000/remote.dat";
+	int r;
+
+    printf("Loading...\n"); fflush(stdout);
+    
+    uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
+
+    if (!uri_load_dsc) {
+	    printf("Some kind of error loading url\n");
+	    d_weather[1].text = "Error loading url";
+	    display(d_weather, sizeof(d_weather)/sizeof(*d_weather));
+	    return;
+    }
+
+    printf("Got it... %d bytes, %s\n", uri_load_dsc->size, uri_load_dsc->data); fflush(stdout);
+    clear_screen();
+#define SIZE 1024
+    static char data[SIZE];
+    int s = uri_load_dsc->size;
+    if (s > SIZE-1)
+        s = SIZE-1;
+
+    memcpy(data, uri_load_dsc->data, s);
+    data[s] = 0;
+
+    r = dl_parse(d_remote, 4, data);
+    if (r < 0) {
+	    printf("Error parsing remote data\n");
+	    d_weather[1].text = "Error parsing remote url";
+	    display(d_weather, sizeof(d_weather)/sizeof(*d_weather));
+	    return;
+    }
+    display(d_remote, sizeof(d_remote)/sizeof(*d_remote));
 }
 
 static int dl_parse(struct display_list *res, int num, const char *arg)
