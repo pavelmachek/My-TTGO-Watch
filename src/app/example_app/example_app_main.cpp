@@ -170,7 +170,7 @@ struct display_list d_weather[] = {
 #else
 struct display_list d_about[4], d_main[4], d_weather[4], d_wait[4];
 
-static int dl_parse(struct display_list *res, int num, char *t);
+static int dl_parse(struct display_list *res, int num, const char *t);
 
 static void dl_parse_all(void)
 {
@@ -386,15 +386,19 @@ static void run_weather(void) {
     display(d_weather, sizeof(d_weather)/sizeof(*d_weather));
 }
 
-static int dl_parse(struct display_list *res, int num, char *t)
+static int dl_parse(struct display_list *res, int num, const char *arg)
 {
 	int i = 0;
 	char *end;
+	char *t = strdup(arg);
 	printf("Parsing: %s\n", t); fflush(stdout);
 	while (*t) {
 		int r;
 		int num;
 		end = strchr(t, '\a');
+		if (end) {
+			*end = 0;
+		}
 
 		r = sscanf(t, "%d%d%d%d%d%n", &res->x, &res->y, &res->sx, &res->sy, &res->mode, &num);
 		res->text = t+num;
@@ -412,6 +416,7 @@ static int dl_parse(struct display_list *res, int num, char *t)
 			return i;
 		t = end+1;
 	}
+	return i;
 }
 
 void example_app_task( lv_task_t * task ) {
