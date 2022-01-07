@@ -175,12 +175,15 @@ static int dl_parse(struct display_list *res, int num, const char *t);
 static void dl_parse_all(void)
 {
 	int r;
-	r = dl_parse(d_main, 4, "0 0 240 40 5 Main menu");
-	if (r < 0) {
-		printf("Could not parse main menu.\n");
-		fflush(stdout);
-	}
+	r = dl_parse(d_main, 4,
+		     "0 0 240 40 5 Main menu\a"
+		     "0 40 240 80 1 [About]\a"
+		     "0 120 240 80 1 [Weather]\a"
+		     "0 200 240 80 1 [Remote]\a"		     
+		);
 	r = dl_parse(d_about, 4, "0 0 240 40 5 About");
+	r = dl_parse(d_weather, 4, "0 0 240 40 5 Weather");
+	r = dl_parse(d_wait, 4, "0 0 240 40 5 Wait");
 }
 
 
@@ -403,8 +406,8 @@ static int dl_parse(struct display_list *res, int num, const char *arg)
 		r = sscanf(t, "%d%d%d%d%d%n", &res->x, &res->y, &res->sx, &res->sy, &res->mode, &num);
 		res->text = t+num;
 		
-		if (r != 6) {
-			printf("Could not parse: %s\n", t);
+		if (r != 5) {
+			printf("Could not parse: %d %s\n", r, t);
 			return -1;
 		}
 		printf("Parsed: %s\n", res->text); fflush(stdout);
