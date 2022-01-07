@@ -182,7 +182,10 @@ static void dl_parse_all(void)
 		     "0 200 240 80 1 [Remote]\a"		     
 		);
 	r = dl_parse(d_about, 4, "0 0 240 40 5 About");
-	r = dl_parse(d_weather, 4, "0 0 240 40 5 Weather");
+	r = dl_parse(d_weather, 4,
+		     "0 0 240 40 5 Weather\a"
+		     "0 40 240 200 5 (results go here)\a"
+		);
 	r = dl_parse(d_wait, 4, "0 0 240 40 5 Wait");
 }
 
