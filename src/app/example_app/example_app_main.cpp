@@ -65,8 +65,9 @@ static void run_remote_task( lv_task_t * task );
 #define C_INIT 2
 
 struct click {
-  int x, y;
-  int type;
+	int x, y;
+	int type;
+	char cookie[128];
 };
 
 struct click click;
@@ -424,8 +425,8 @@ static void run_remote_task( lv_task_t * task ) {
 	char url[128];
 	int r;
 
-	sprintf(url, "http://10.0.0.9:8000/cgi-bin/remote.py?x=%d&y=%d&type=%d",
-	       click.x, click.y, click.type);
+	sprintf(url, "http://10.0.0.9:8000/cgi-bin/remote.py?x=%d&y=%d&type=%d&cookie=%s",
+		click.x, click.y, click.type, click.cookie);
 
     printf("Loading...\n"); fflush(stdout);
     
@@ -441,7 +442,7 @@ static void run_remote_task( lv_task_t * task ) {
     printf("Got it... %d bytes, %s\n", uri_load_dsc->size, uri_load_dsc->data); fflush(stdout);
     clear_screen();
 #define SIZE 1024
-    static char data[SIZE];
+    static char data[SIZE], *t;
     int s = uri_load_dsc->size;
     if (s > SIZE-1)
         s = SIZE-1;
@@ -449,7 +450,17 @@ static void run_remote_task( lv_task_t * task ) {
     memcpy(data, uri_load_dsc->data, s);
     data[s] = 0;
 
-    r = dl_parse(d_remote, 4, data);
+    t = strchr(data, '\n');
+    if (!t) {
+	    printf("No cookie\n");
+	    d_weather[1].text = "No cookie";
+	    display(d_weather, sizeof(d_weather)/sizeof(*d_weather));
+	    return;
+    }
+    *t++ = 0;
+    strcpy(click.cookie, data);
+    
+    r = dl_parse(d_remote, 4, t);
     if (r < 0) {
 	    printf("Error parsing remote data\n");
 	    d_weather[1].text = "Error parsing remote url";
