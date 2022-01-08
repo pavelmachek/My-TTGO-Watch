@@ -440,6 +440,7 @@ static void run_remote_task( lv_task_t * task ) {
 	    display(d_weather, sizeof(d_weather)/sizeof(*d_weather));
 	    return;
     }
+    clear_screen();
     display(d_remote, sizeof(d_remote)/sizeof(*d_remote));
 }
 
