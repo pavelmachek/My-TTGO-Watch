@@ -61,6 +61,15 @@ lv_obj_t *objects[128];
 static void run_weather_task( lv_task_t * task );
 static void run_remote_task( lv_task_t * task );
 
+#define C_LONG 1
+#define C_INIT 2
+
+struct click {
+  int x, y;
+  int type;
+};
+
+struct click click;
 
 static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -225,13 +234,17 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
     int x, y;
     x = obj->coords.x1;
     y = obj->coords.y1;
+    click.x = x;
+    click.y = y;
+    click.type = 0;
     printf("obj @ %d %d\n", x, y);
     switch( event ) {
         case( LV_EVENT_SHORT_CLICKED ):
 	    printf("big_btn -- short\n"); fflush(stdout);
                                         break;
         case( LV_EVENT_LONG_PRESSED ):
-	    printf("big_btn -- long\n"); fflush(stdout);	  
+	    printf("big_btn -- long\n"); fflush(stdout);
+	    click.type |= C_LONG;
                                         break;
     default:
 	    return;
@@ -249,6 +262,7 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 		    lv_task_create( run_weather_task, 1, LV_TASK_PRIO_MID, NULL );
 		    break;
 	    case 4*S ... 6*S:
+	      click.type |= C_INIT;
 		    state = S_REMOTE; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
 		    lv_task_create( run_remote_task, 1, LV_TASK_PRIO_MID, NULL );
 		    break;
@@ -407,10 +421,11 @@ static void run_weather_task( lv_task_t * task ) {
 }
 
 static void run_remote_task( lv_task_t * task ) {
-  //char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/decoded/LKPR.TXT";
-	//char url[] = "https://tgftp.nws.noaa.gov/data/observations/metar/stations/LKPR.TXT";
-	char url[] = "http://10.0.0.9:8000/cgi-bin/remote.py";
+	char url[128];
 	int r;
+
+	sprintf(url, "http://10.0.0.9:8000/cgi-bin/remote.py?x=%d&y=%d&type=%d",
+	       click.x, click.y, click.type);
 
     printf("Loading...\n"); fflush(stdout);
     
