@@ -259,7 +259,7 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    state = S_MAIN; display(d_main, sizeof(d_main)/sizeof(*d_main));
 	    break;
     case S_REMOTE:
-	    lv_task_create( run_remote_task, 5000, LV_TASK_PRIO_MID, NULL );
+	    lv_task_create( run_remote_task, 1, LV_TASK_PRIO_MID, NULL );
 	    break;
     }
 }
@@ -480,7 +480,7 @@ static int dl_parse(struct display_list *res, int num, const char *arg)
 }
 
 static void run_weather(void) {
-	lv_task_create( run_weather_task, 5000, LV_TASK_PRIO_MID, NULL );
+	lv_task_create( run_weather_task, 1, LV_TASK_PRIO_MID, NULL );
 }
 
 void example_app_task( lv_task_t * task ) {
