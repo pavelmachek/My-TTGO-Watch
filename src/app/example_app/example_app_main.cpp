@@ -51,7 +51,7 @@ LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 LV_FONT_DECLARE(Ubuntu_72px);
 
-#define DELAY 400
+#define DELAY 1
 
 #define S_MAIN 0
 #define S_ABOUT 1
