@@ -478,7 +478,13 @@ static int dl_parse(struct display_list *res, int num, const char *arg)
 	char *end;
 	char *t = strdup(arg);
 	printf("Parsing: %s\n", t); fflush(stdout);
-	while (*t) {
+	for (i=0; i<num; i++) {
+		if (!t || !*t) {
+			res->mode = 0;
+			res++;
+			continue;
+		}
+
 		int r;
 		int num;
 		end = strchr(t, '\a');
@@ -494,15 +500,15 @@ static int dl_parse(struct display_list *res, int num, const char *arg)
 			return -1;
 		}
 		printf("Parsed: %s\n", res->text); fflush(stdout);
-		i++; res++;
-		if (i == num)
-			return -1;
+		res++;
 		
-		if (!end)
-			return i;
+		if (!end) {
+			t = NULL;
+			continue;
+		}
 		t = end+1;
 	}
-	return i;
+	return 0;
 }
 
 static void run_weather(void) {
