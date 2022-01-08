@@ -460,7 +460,7 @@ static void run_remote_task( lv_task_t * task ) {
     *t++ = 0;
     strcpy(click.cookie, data);
     
-    r = dl_parse(d_remote, 4, t);
+    r = dl_parse(d_remote, 40, t);
     if (r < 0) {
 	    printf("Error parsing remote data\n");
 	    d_weather[1].text = "Error parsing remote url";
