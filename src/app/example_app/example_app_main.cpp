@@ -51,6 +51,8 @@ LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 LV_FONT_DECLARE(Ubuntu_72px);
 
+#define DELAY 400
+
 #define S_MAIN 0
 #define S_ABOUT 1
 #define S_WEATHER 2
@@ -260,12 +262,12 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 		    break;
 	    case 2*S ... 4*S-1:
 		    state = S_WEATHER; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
-		    lv_task_create( run_weather_task, 1, LV_TASK_PRIO_MID, NULL );
+		    lv_task_create( run_weather_task, DELAY, LV_TASK_PRIO_MID, NULL );
 		    break;
 	    case 4*S ... 6*S:
 	      click.type |= C_INIT;
 		    state = S_REMOTE; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
-		    lv_task_create( run_remote_task, 1, LV_TASK_PRIO_MID, NULL );
+		    lv_task_create( run_remote_task, DELAY, LV_TASK_PRIO_MID, NULL );
 		    break;
 	    }
 	    break;
@@ -274,7 +276,7 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    state = S_MAIN; display(d_main, sizeof(d_main)/sizeof(*d_main));
 	    break;
     case S_REMOTE:
-	    lv_task_create( run_remote_task, 1, LV_TASK_PRIO_MID, NULL );
+	    lv_task_create( run_remote_task, DELAY, LV_TASK_PRIO_MID, NULL );
 	    break;
     }
 }
@@ -428,7 +430,7 @@ static void run_remote_task( lv_task_t * task ) {
 	sprintf(url, "http://10.0.0.9:8000/cgi-bin/remote.py?x=%d&y=%d&type=%d&cookie=%s",
 		click.x, click.y, click.type, click.cookie);
 
-    printf("Loading...\n"); fflush(stdout);
+	printf("Loading...%s\n", url); fflush(stdout);
     
     uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
 
@@ -512,7 +514,7 @@ static int dl_parse(struct display_list *res, int num, const char *arg)
 }
 
 static void run_weather(void) {
-	lv_task_create( run_weather_task, 1, LV_TASK_PRIO_MID, NULL );
+	lv_task_create( run_weather_task, DELAY, LV_TASK_PRIO_MID, NULL );
 }
 
 void example_app_task( lv_task_t * task ) {
