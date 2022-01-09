@@ -47,6 +47,9 @@ lv_obj_t *example_app_main_tile = NULL;
 lv_task_t * _example_app_task;
 
 LV_IMG_DECLARE(refresh_32px);
+LV_IMG_DECLARE(download_32px);
+LV_IMG_DECLARE(t_watch_2020_240px);
+
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 LV_FONT_DECLARE(Ubuntu_72px);
@@ -79,8 +82,6 @@ static void enter_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event )
 void example_app_task( lv_task_t * task );
 
 lv_style_t example_app_main_style,  example_app_big_style, example_app_small_style;
-
-lv_obj_t *test_label = NULL;
 
 lv_obj_t *big_btn = NULL;
 
@@ -128,6 +129,7 @@ static void example_hibernate_cb( void ) {
 #define M_TEXT 1
 #define M_BIG 2
 #define M_SMALL 4
+#define M_IMG 8
 
 struct display_list {
   int x, y, sx, sy;
@@ -195,7 +197,10 @@ static void dl_parse_all(void)
 		     "0 120 240 80 1 [Weather]\a"
 		     "0 200 240 80 1 [Remote]\a"		     
 		);
-	r = dl_parse(d_about, 4, "0 0 240 40 5 About");
+	r = dl_parse(d_about, 4, "0 0 240 40 3 About\a"
+		                 "0 80 240 240 5 Even wristwatch should run free\n"
+		     "software. Esp32 means it really\n"
+		     "is a small computer.");
 	r = dl_parse(d_weather, 4,
 		     "0 0 240 40 5 Weather\a"
 		     "0 40 240 200 5 (results go here)\a"
@@ -210,26 +215,32 @@ static void display(display_list *display, int num)
 {
     for (int i=0; i<num; i++) {
 	    struct display_list *l = display+i;
+	    lv_obj_t *lvo = NULL;
 
-	    if (!l->mode & M_TEXT)
-		    continue;
+	    if (l->mode & M_IMG) {
+	      lvo = lv_img_create( example_app_main_tile, NULL );
+	      lv_img_set_src( lvo, &download_32px );
+	    } else if (l->mode & M_TEXT) {
+	      lvo = lv_label_create( example_app_main_tile, NULL);
 
-	    test_label = lv_label_create( example_app_main_tile, NULL);
+	      if (l->mode & M_BIG)
+		    lv_obj_add_style( lvo, LV_OBJ_PART_MAIN, &example_app_big_style  );
+	      else if (l->mode & M_SMALL)
+		lv_obj_add_style( lvo, LV_OBJ_PART_MAIN, &example_app_small_style  );
+	      else
+		    lv_obj_add_style( lvo, LV_OBJ_PART_MAIN, &example_app_main_style  );
 
-	    if (l->mode & M_BIG)
-		    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_big_style  );
-	    else if (l->mode & M_SMALL)
-		    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_small_style  );	    
-	    else
-		    lv_obj_add_style( test_label, LV_OBJ_PART_MAIN, &example_app_main_style  );
+	      lv_label_set_text(lvo, l->text);
+	    } else {
+	      objects[i] = NULL;
+	      continue;
+	    }
+    //    lv_obj_align( lvo, example_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
+	    lv_obj_set_width(lvo, l->sx);
+	    lv_obj_set_height(lvo, l->sy);
+	    lv_obj_set_pos(lvo, l->x, l->y);
 
-	    lv_label_set_text( test_label, l->text);
-    //    lv_obj_align( test_label, example_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
-	    lv_obj_set_width( test_label, l->sx);
-	    lv_obj_set_height( test_label, l->sy);
-	    lv_obj_set_pos( test_label, l->x, l->y);
-
-	    objects[i] = test_label;
+	    objects[i] = lvo;
     }
 }
 
