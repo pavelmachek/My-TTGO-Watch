@@ -198,9 +198,11 @@ static void dl_parse_all(void)
 		     "0 200 240 80 1 [Remote]\a"		     
 		);
 	r = dl_parse(d_about, 4, "0 0 240 40 3 About\a"
-		                 "0 80 240 240 5 Even wristwatch should run free\n"
+		                 "0 80 240 80 5 Even wristwatch should run free\n"
 		     "software. Esp32 means it really\n"
-		     "is a small computer.");
+		     "is a small computer.\a"
+		     "0 160 240 160 8");
+	
 	r = dl_parse(d_weather, 4,
 		     "0 0 240 40 5 Weather\a"
 		     "0 40 240 200 5 (results go here)\a"
