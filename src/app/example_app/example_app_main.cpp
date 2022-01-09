@@ -65,6 +65,7 @@ lv_obj_t *objects[128];
 
 static void run_weather_task( lv_task_t * task );
 static void run_remote_task( lv_task_t * task );
+static void run_image_task( lv_task_t * task );
 
 #define C_LONG 1
 #define C_INIT 2
@@ -213,6 +214,8 @@ static void dl_parse_all(void)
 
 #endif
 
+static lv_obj_t *lvo_img;
+
 static void display(display_list *display, int num)
 {
     for (int i=0; i<num; i++) {
@@ -222,6 +225,7 @@ static void display(display_list *display, int num)
 	    if (l->mode & M_IMG) {
 	      lvo = lv_img_create( example_app_main_tile, NULL );
 	      lv_img_set_src( lvo, &download_32px );
+	      lvo_img = lvo;
 	    } else if (l->mode & M_TEXT) {
 	      lvo = lv_label_create( example_app_main_tile, NULL);
 
@@ -272,6 +276,7 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    switch (y) {
 	    case 0 ... 2*S-1:
 		    state = S_ABOUT; display(d_about, sizeof(d_about)/sizeof(*d_about));
+		    lv_task_create( run_image_task, DELAY, LV_TASK_PRIO_MID, NULL );
 		    break;
 	    case 2*S ... 4*S-1:
 		    state = S_WEATHER; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
@@ -484,6 +489,43 @@ static void run_remote_task( lv_task_t * task ) {
     }
     clear_screen();
     display(d_remote, sizeof(d_remote)/sizeof(*d_remote));
+    lv_task_del(task);
+}
+
+static void run_image_task( lv_task_t * task ) {
+	char url[128];
+	int r;
+
+	sprintf(url, "http://10.0.0.9:8000/remote.raw");
+
+	printf("Loading...%s\n", url); fflush(stdout);
+    
+    uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
+
+    if (!uri_load_dsc) {
+	    printf("Some kind of error loading url\n");
+	    d_weather[1].text = "Error loading url";
+	    display(d_weather, sizeof(d_weather)/sizeof(*d_weather));
+	    return;
+    }
+
+    printf("Got it... %d bytes\n", uri_load_dsc->size); fflush(stdout);
+
+    printf("LV_COLOR_DEPTH is %d, need 32\n", LV_COLOR_DEPTH);
+
+    lv_img_dsc_t raw_img;
+    raw_img.header.always_zero = 0;
+    raw_img.header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA;
+    raw_img.header.w = 32;
+    raw_img.header.h = 32;
+
+    raw_img.data = uri_load_dsc->data;
+    raw_img.data_size = uri_load_dsc->size;
+      
+    lv_img_set_src( lvo_img, &raw_img );
+
+    printf("Image set\n", uri_load_dsc->size); fflush(stdout);
+    
     lv_task_del(task);
 }
 
