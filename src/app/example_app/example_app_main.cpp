@@ -33,6 +33,7 @@
 #include "gui/statusbar.h"
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
+#include "gui/png_decoder/lv_png.h"
 
 #include "utils/uri_load/uri_load.h"
 
@@ -513,7 +514,38 @@ static void run_image_task( lv_task_t * task ) {
 
     printf("LV_COLOR_DEPTH is %d, need 32\n", LV_COLOR_DEPTH);
 
-    lv_img_dsc_t raw_img;
+#if 0
+    //lv_img_set_src( lvo_img, uri_load_dsc->data );
+    //lv_img_set_src( lvo_img, "S:/spiffs/gpsctl.json");
+    //lv_img_set_src( lvo_img, "S/fast/pavel/.hedge/spiffs/osmmap.json");
+    lv_img_set_src( lvo_img, LV_SYMBOL_DUMMY "crazy?");
+#endif
+#if 0
+    {
+      lv_res_t res;
+      lv_img_decoder_dsc_t dsc;
+      res = lv_img_decoder_open(&dsc, uri_load_dsc->data, LV_COLOR_WHITE);
+
+      if(res == LV_RES_OK) {
+	printf("got okay?\n"); fflush(stdout);
+	/*Do something with `dsc->img_data`*/
+	lv_img_set_src( lvo_img, dsc.img_data );
+	
+	lv_img_decoder_close(&dsc);
+      } else {
+	printf("got error?!\n"); fflush(stdout);
+      }
+
+    }
+#endif
+#if 0
+    static lv_img_dsc_t raw_img = refresh_32px;
+    //    raw_img.data = uri_load_dsc->data;
+      
+    lv_img_set_src( lvo_img, &raw_img );
+#endif    
+#if 1
+    static lv_img_dsc_t raw_img;
     raw_img.header.always_zero = 0;
     raw_img.header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA;
     raw_img.header.w = 32;
@@ -521,9 +553,23 @@ static void run_image_task( lv_task_t * task ) {
 
     raw_img.data = uri_load_dsc->data;
     raw_img.data_size = uri_load_dsc->size;
-      
-    lv_img_set_src( lvo_img, &raw_img );
 
+    lv_img_cache_invalidate_src(&raw_img);
+    lv_img_set_src( lvo_img, &raw_img );
+    //lv_img_set_src( lvo_img, &refresh_32px );
+#endif
+#if 0
+    lv_img_decoder_dsc_t png_img;
+
+    png_img.src_type = LV_IMG_SRC_VARIABLE;
+    png_img.src = uri_load_dsc->data;
+    if (LV_RES_OK != decoder_open(NULL, &png_img)) {
+      printf("Something went wrong decoding png?\n"); fflush(stdout);
+      lv_img_set_src( lvo_img, &refresh_32px );      
+    } else {
+      lv_img_set_src( lvo_img, png_img.img_data );
+    }
+#endif
     printf("Image set\n", uri_load_dsc->size); fflush(stdout);
     
     lv_task_del(task);
