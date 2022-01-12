@@ -509,8 +509,8 @@ static void run_image_task( lv_task_t * task ) {
 	char url[128];
 	int r;
 
-	//sprintf(url, image.url+1);
-        sprintf(url, "http://10.0.0.9:8000/remote.raw");
+	sprintf(url, image.url);
+        //sprintf(url, "http://10.0.0.9:8000/remote.raw");
 
 
 	printf("Loading...%s\n", url); fflush(stdout);
@@ -596,7 +596,7 @@ static int dl_parse(struct display_list *res, int num, const char *arg)
 	char *t = strdup(arg);
 	printf("Parsing: %s\n", t); fflush(stdout);
 	for (i=0; i<num; i++) {
-		if (!t || !*t) {
+		if (!t || !*t || *t == '\n') {
 			res->mode = 0;
 			res++;
 			continue;
@@ -610,7 +610,7 @@ static int dl_parse(struct display_list *res, int num, const char *arg)
 		}
 
 		r = sscanf(t, "%d%d%d%d%d%n", &res->x, &res->y, &res->sx, &res->sy, &res->mode, &num);
-		res->text = t+num;
+		res->text = t+num+1;
 		
 		if (r != 5) {
 			printf("Could not parse: %d %s\n", r, t);
