@@ -79,6 +79,14 @@ struct click {
 
 struct click click;
 
+struct image {
+	char url[128];
+	int sx, sy;
+  lv_obj_t *lvo;
+};
+
+struct image image;
+
 static void exit_example_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void example_app_task( lv_task_t * task );
@@ -227,6 +235,11 @@ static void display(display_list *display, int num)
 	      lvo = lv_img_create( example_app_main_tile, NULL );
 	      lv_img_set_src( lvo, &download_32px );
 	      lvo_img = lvo;
+
+	      image.sx = l->sx;
+	      image.sy = l->sy;
+	      strcpy(image.url, l->text);
+	      lv_task_create( run_image_task, DELAY, LV_TASK_PRIO_MID, NULL );
 	    } else if (l->mode & M_TEXT) {
 	      lvo = lv_label_create( example_app_main_tile, NULL);
 
@@ -277,14 +290,13 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    switch (y) {
 	    case 0 ... 2*S-1:
 		    state = S_ABOUT; display(d_about, sizeof(d_about)/sizeof(*d_about));
-		    lv_task_create( run_image_task, DELAY, LV_TASK_PRIO_MID, NULL );
 		    break;
 	    case 2*S ... 4*S-1:
 		    state = S_WEATHER; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
 		    lv_task_create( run_weather_task, DELAY, LV_TASK_PRIO_MID, NULL );
 		    break;
 	    case 4*S ... 6*S:
-	      click.type |= C_INIT;
+	      click.type = C_INIT;
 		    state = S_REMOTE; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
 		    lv_task_create( run_remote_task, DELAY, LV_TASK_PRIO_MID, NULL );
 		    break;
@@ -497,7 +509,9 @@ static void run_image_task( lv_task_t * task ) {
 	char url[128];
 	int r;
 
-	sprintf(url, "http://10.0.0.9:8000/remote.raw");
+	//sprintf(url, image.url+1);
+        sprintf(url, "http://10.0.0.9:8000/remote.raw");
+
 
 	printf("Loading...%s\n", url); fflush(stdout);
     
@@ -548,8 +562,8 @@ static void run_image_task( lv_task_t * task ) {
     static lv_img_dsc_t raw_img;
     raw_img.header.always_zero = 0;
     raw_img.header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA;
-    raw_img.header.w = 32;
-    raw_img.header.h = 32;
+    raw_img.header.w = image.sx;
+    raw_img.header.h = image.sy;
 
     raw_img.data = uri_load_dsc->data;
     raw_img.data_size = uri_load_dsc->size;
