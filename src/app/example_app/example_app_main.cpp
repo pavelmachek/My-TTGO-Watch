@@ -339,6 +339,7 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_obj_set_pos( test_label, 0, 0);
 #endif
 
+    strcpy(click.cookie, "init");
     dl_parse_all();
 
     lv_style_copy( &example_app_main_style, APP_STYLE );
@@ -465,10 +466,13 @@ static void run_remote_task( lv_task_t * task ) {
     
     uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
 
+    printf("Got result loading uri\n", uri_load_dsc->size); fflush(stdout);
+
     if (!uri_load_dsc) {
 	    printf("Some kind of error loading url\n");
 	    d_weather[1].text = "Error loading url";
 	    display(d_weather, sizeof(d_weather)/sizeof(*d_weather));
+	    lv_task_del(task);
 	    return;
     }
 
@@ -488,6 +492,7 @@ static void run_remote_task( lv_task_t * task ) {
 	    printf("No cookie\n");
 	    d_weather[1].text = "No cookie";
 	    display(d_weather, sizeof(d_weather)/sizeof(*d_weather));
+	    lv_task_del(task);
 	    return;
     }
     *t++ = 0;
