@@ -2,6 +2,8 @@
  *   Aug 21 17:26:00 2020
  *   Copyright  2020  Chris McNamee
  *   Email: chris.mcna@gmail.com
+ *   Copyright  2022  Pavel Machek
+ *   Email: pavel@ucw.cz
  ****************************************************************************/
  
 /*
@@ -63,6 +65,11 @@ static void stop_astro_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void reset_astro_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void astro_app_task( lv_task_t * task );
+
+extern "C" {
+  extern void sunrise_display_callback( char *buf, int len, int flags );
+}
+
 
 void astro_app_main_setup( uint32_t tile_num ) {
 
@@ -147,8 +154,8 @@ static void astro_app_main_update_astrolabel()
     // milliseconds
     //int mill = astro_milliseconds % 1000;
 
-    char msg[10];
-    sprintf(msg,"%02d:%02d", min, sec);
+    char msg[100];
+    sunrise_display_callback(msg, 100, 0);
 
     lv_label_set_text(astro_app_main_astrolabel, msg);
     lv_obj_align(astro_app_main_astrolabel, NULL, LV_ALIGN_CENTER, 0, 0);
