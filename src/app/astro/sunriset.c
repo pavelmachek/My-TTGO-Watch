@@ -19,7 +19,7 @@ Released to the public domain by Paul Schlyter, December 1992
 
 #include <stdio.h>
 #include <math.h>
-
+#include <time.h>
 
 /* A macro to compute the number of days elapsed since 2000 Jan 0.0 */
 /* (which is equal to 1999 Dec 31, 0h UT)                           */
@@ -124,14 +124,10 @@ double rev180( double x );
 
 double GMST0( double d );
 
-void sunrise_display_callback( char *buf, int len, int flags )
-{
-  sprintf(buf, "hello world!\n");
-}
+#define sprint_t(buf, s, val) sprintf(buf, "%2d:%02d " s, (int) val, (int) (60.*(val-(int)val)))
 
 /* A small test program */
-
-main_test()
+void sunrise_display_callback( char *buf, int len, int flags )
 {
       int year,month,day;
       double lon, lat;
@@ -139,17 +135,23 @@ main_test()
       double rise, set, civ_start, civ_end, naut_start, naut_end,
              astr_start, astr_end;
       int    rs, civ, naut, astr;
-      char buf[80];
+      struct tm now;
+      time_t now_t;
+      double now_hour;
 
-      printf( "Longitude (+ is east) and latitude (+ is north) : " );
-      fgets(buf, 80, stdin);
-      sscanf(buf, "%lf %lf", &lon, &lat );
+      sprintf(buf, "(bug)");
+      
+      lon = 14;
+      lat = 50;
 
-      for(;;)
+      now_t = time(NULL);
+      now = *gmtime(&now_t);
+      now_hour = now.tm_hour + now.tm_min / 60.;
+      
       {
-            printf( "Input date ( yyyy mm dd ) (ctrl-C exits): " );
-            fgets(buf, 80, stdin);
-            sscanf(buf, "%d %d %d", &year, &month, &day );
+	    year = now.tm_year + 1900;
+	    month = now.tm_mon + 1;
+	    day = now.tm_mday;
 
             daylen  = day_length(year,month,day,lon,lat);
             civlen  = day_civil_twilight_length(year,month,day,lon,lat);
@@ -184,12 +186,21 @@ main_test()
                 case 0:
                     printf( "Sun rises %5.2fh UT, sets %5.2fh UT\n",
                              rise, set );
+		    if (now_hour > rise && now_hour < set) {
+		    	sprint_t(buf, "set", set - now_hour);		      
+		    } else {
+		        double val = rise - now_hour;
+			if (val < 0)
+			  val += 24;
+		    	sprint_t(buf, "rise", val);
+		    }
+
                     break;
                 case +1:
-                    printf( "Sun above horizon\n" );
+		    sprintf(buf, "above");
                     break;
                 case -1:
-                    printf( "Sun below horizon\n" );
+		    sprintf(buf, "below");
                     break;
             }
 
