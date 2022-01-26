@@ -50,8 +50,8 @@ static void enter_astro_app_event_cb( lv_obj_t * obj, lv_event_t event );
 
 // setup routine for astro app
 void astro_app_setup( void ) {
-    astro_app_main_tile_num = mainbar_add_app_tile( 1, 1, "Stopwatch App" );
-    astro_app = app_register( "stop\nwatch", &astro_app_64px, enter_astro_app_event_cb );
+    astro_app_main_tile_num = mainbar_add_app_tile( 1, 1, "Astro App" );
+    astro_app = app_register( "astro", &astro_app_64px, enter_astro_app_event_cb );
     astro_app_main_setup( astro_app_main_tile_num );
 }
 
