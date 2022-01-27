@@ -63,7 +63,6 @@ static void enter_astro_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       astro_app_hide_app_icon_info( true );
                                         mainbar_jump_to_tilenumber( astro_app_main_tile_num, LV_ANIM_OFF );
-                                        statusbar_hide( true );
                                         break;
     }    
 }

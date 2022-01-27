@@ -124,7 +124,7 @@ double rev180( double x );
 
 double GMST0( double d );
 
-#define sprint_t(buf, s, val) sprintf(buf, "%2d:%02d " s, (int) (val), (int) (60.*(val-(int)(val))))
+#define sprint_t(buf, s, val) sprintf(buf, "%2d:%02d" s, (int) (val), (int) (60.*(val-(int)(val))))
 
 /* A small test program */
 void sunrise_display_callback( char *buf, int len, int flags )
@@ -147,8 +147,14 @@ void sunrise_display_callback( char *buf, int len, int flags )
       now_t = time(NULL);
       now = *gmtime(&now_t);
       now_hour = now.tm_hour + now.tm_min / 60.;
-      
+
+      printf("Zone: %d\n", flags);
+
       {
+	char rise_b[50];
+	char set_b[50];
+	char next[50];
+	
 	    year = now.tm_year + 1900;
 	    month = now.tm_mon + 1;
 	    day = now.tm_mday;
@@ -186,14 +192,19 @@ void sunrise_display_callback( char *buf, int len, int flags )
                 case 0:
                     printf( "Sun rises %5.2fh UT, sets %5.2fh UT\n",
                              rise, set );
+
+
 		    if (now_hour > rise && now_hour < set) {
-		    	sprint_t(buf, "set", set - now_hour);		      
+		    	sprint_t(next, " set", set - now_hour);
 		    } else {
 		        double val = rise - now_hour;
 			if (val < 0)
 			  val += 24;
-		    	sprint_t(buf, "rise", val);
+		    	sprint_t(next, " rise", val);
 		    }
+		    sprint_t(rise_b, "", rise);
+		    sprint_t(set_b, "", set);
+		    sprintf(buf, "%s\nRise: %s\nSet: %s\n", next, rise_b, set_b);
 
                     break;
                 case +1:
@@ -245,7 +256,8 @@ void sunrise_display_callback( char *buf, int len, int flags )
                     printf( "Never as bright as astronomical twilight\n" );
                     break;
             }
-      return 0;
+
+	    fflush(stdout);
       }
 }
 

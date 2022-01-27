@@ -33,6 +33,8 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
+#include "hardware/timesync.h"
+
 #ifdef NATIVE_64BIT
     #include <time.h>
     #include "utils/logging.h"
@@ -56,6 +58,7 @@ lv_style_t astro_app_main_astrostyle;
 lv_task_t * _astro_app_task;
 
 LV_FONT_DECLARE(Ubuntu_72px);
+LV_FONT_DECLARE(Ubuntu_32px);
 
 bool astro_button_event_cb( EventBits_t event, void *arg );
 bool astro_style_change_event_cb( EventBits_t event, void *arg );
@@ -76,15 +79,15 @@ void astro_app_main_setup( uint32_t tile_num ) {
     astro_app_main_tile = mainbar_get_tile_obj( tile_num );
 
     lv_style_copy( &astro_app_main_astrostyle, APP_STYLE );
-    lv_style_set_text_font( &astro_app_main_astrostyle, LV_STATE_DEFAULT, &Ubuntu_72px);
+    lv_style_set_text_font( &astro_app_main_astrostyle, LV_STATE_DEFAULT, &Ubuntu_32px);
 
     lv_obj_t * astro_cont = mainbar_obj_create( astro_app_main_tile );
-    lv_obj_set_size( astro_cont, LV_HOR_RES , LV_VER_RES / 2 );
+    lv_obj_set_size( astro_cont, LV_HOR_RES , LV_VER_RES - 100 );
     lv_obj_add_style( astro_cont, LV_OBJ_PART_MAIN, APP_STYLE );
     lv_obj_align( astro_cont, astro_app_main_tile, LV_ALIGN_CENTER, 0, 0 );
 
     astro_app_main_astrolabel = lv_label_create( astro_cont , NULL);
-    lv_label_set_text(astro_app_main_astrolabel, "00:00");
+    lv_label_set_text(astro_app_main_astrolabel, "(wait)");
     lv_obj_reset_style_list( astro_app_main_astrolabel, LV_OBJ_PART_MAIN );
     lv_obj_add_style( astro_app_main_astrolabel, LV_OBJ_PART_MAIN, &astro_app_main_astrostyle );
     lv_obj_align(astro_app_main_astrolabel, NULL, LV_ALIGN_CENTER, 0, 0);
@@ -135,7 +138,7 @@ bool astro_button_event_cb( EventBits_t event, void *arg ) {
 bool astro_style_change_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case STYLE_CHANGE:      lv_style_copy( &astro_app_main_astrostyle, APP_STYLE );
-                                lv_style_set_text_font( &astro_app_main_astrostyle, LV_STATE_DEFAULT, &Ubuntu_72px);
+                                lv_style_set_text_font( &astro_app_main_astrostyle, LV_STATE_DEFAULT, &Ubuntu_32px);
                                 break;
     }
     return( true );
@@ -143,19 +146,8 @@ bool astro_style_change_event_cb( EventBits_t event, void *arg ) {
 
 static void astro_app_main_update_astrolabel()
 {
-    //int hr = (astro_milliseconds / (1000 * 60 * 60)) % 24;
-
-    // minutes
-    int min = (astro_milliseconds / (1000 * 60)) % 60;
-
-    // seconds
-    int sec = (astro_milliseconds / 1000) % 60;
-
-    // milliseconds
-    //int mill = astro_milliseconds % 1000;
-
     char msg[100];
-    sunrise_display_callback(msg, 100, 0);
+    sunrise_display_callback(msg, 100, timesync_get_timezone());
 
     lv_label_set_text(astro_app_main_astrolabel, msg);
     lv_obj_align(astro_app_main_astrolabel, NULL, LV_ALIGN_CENTER, 0, 0);
