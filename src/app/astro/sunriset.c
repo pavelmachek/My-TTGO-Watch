@@ -124,7 +124,7 @@ double rev180( double x );
 
 double GMST0( double d );
 
-#define sprint_t(buf, s, val) sprintf(buf, "%2d:%02d " s, (int) val, (int) (60.*(val-(int)val)))
+#define sprint_t(buf, s, val) sprintf(buf, "%2d:%02d " s, (int) (val), (int) (60.*(val-(int)(val))))
 
 /* A small test program */
 void sunrise_display_callback( char *buf, int len, int flags )
