@@ -138,6 +138,7 @@ void sunrise_display_callback( char *buf, int len, int flags )
       struct tm now;
       time_t now_t;
       double now_hour;
+      int zone;
 
       sprintf(buf, "(bug)");
       
@@ -145,10 +146,14 @@ void sunrise_display_callback( char *buf, int len, int flags )
       lat = 50;
 
       now_t = time(NULL);
+      now = *localtime(&now_t);
+      //zone = now.tm_gmtoff / 3600; // only works on emulator
+      zone = now.tm_hour;
       now = *gmtime(&now_t);
       now_hour = now.tm_hour + now.tm_min / 60.;
+      zone -= now.tm_hour;
 
-      printf("Zone: %d\n", flags);
+      printf("Zone: %d\n", zone);
 
       {
 	char rise_b[50];
@@ -202,9 +207,10 @@ void sunrise_display_callback( char *buf, int len, int flags )
 			  val += 24;
 		    	sprint_t(next, " rise", val);
 		    }
-		    sprint_t(rise_b, "", rise);
-		    sprint_t(set_b, "", set);
-		    sprintf(buf, "%s\nRise: %s\nSet: %s\n", next, rise_b, set_b);
+		    sprint_t(rise_b, "", (rise + zone));
+		    sprint_t(set_b, "", (set + zone));
+		    sprintf(buf, "Rise: %s\nSet: %s\nZone: %d\n%s",
+			    rise_b, set_b, zone, next);
 
                     break;
                 case +1:
