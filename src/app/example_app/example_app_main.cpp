@@ -213,7 +213,7 @@ static void dl_parse_all(void)
 		                 "0 80 240 80 5 Even wristwatch should run free\n"
 		     "software. Esp32 means it really\n"
 		     "is a small computer.\a"
-		     "0 160 240 160 8");
+		     "0 160 240 160 1 [Close]");
 	
 	r = dl_parse(d_weather, 4,
 		     "0 0 240 40 5 Weather\a"
