@@ -5,3 +5,4 @@ else
     sudo chown pavel /dev/ttyUSB0 
     platformio run -t upload
 fi
+# platformio run -t cleanall

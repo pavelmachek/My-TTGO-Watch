@@ -1,16 +1,21 @@
 #include <stdio.h>
 
 extern "C" {
+#if 0
 #include "../../lua-on-arduino/src/lua/lua.h"
 #include "../../lua-on-arduino/src/lua/lualib.h"
 #include "../../lua-on-arduino/src/lua/lauxlib.h"
+#else
+#include <lua5.3/lua.h>
+#include <lua5.3/lualib.h>
+#include <lua5.3/lauxlib.h>
+#endif  
 }
 
 void lua_test(void) {
   printf("Should test lua\n");
-  return;
   
-  lua_State *L = lua_open();
+  lua_State *L = luaL_newstate();
   luaopen_base(L);
   //  luaopen_io(L);
   luaopen_string(L);
@@ -40,8 +45,10 @@ void lua_test(void) {
   lua_close(L);
 
   printf("Done testing lua\n");
+  fflush(stdout);
 }
-    
+
+#if 0
 void load (char *filename, int *width, int *height) {
   lua_State *L = lua_open();
   luaopen_base(L);
@@ -66,3 +73,4 @@ void load (char *filename, int *width, int *height) {
     
   lua_close(L);
 }
+#endif
