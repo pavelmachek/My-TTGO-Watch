@@ -37,6 +37,8 @@
 
 #include "utils/uri_load/uri_load.h"
 
+extern void lua_test(void);
+
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
 #else
@@ -290,6 +292,7 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    switch (y) {
 	    case 0 ... 2*S-1:
 		    state = S_ABOUT; display(d_about, sizeof(d_about)/sizeof(*d_about));
+		    lua_test();
 		    break;
 	    case 2*S ... 4*S-1:
 		    state = S_WEATHER; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
