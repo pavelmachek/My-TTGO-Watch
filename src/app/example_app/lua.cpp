@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+void lua_test(void) {}
+
 #if 0
 extern "C" {
 #if 0
@@ -77,6 +79,7 @@ void load (char *filename, int *width, int *height) {
 #endif
 #endif
 
+#if 0
 //#include "mbed.h"
 extern "C" {
 #include "runtime.h"
@@ -108,3 +111,4 @@ int main() {
     mp_deinit();
     return 0;
 }
+#endif
