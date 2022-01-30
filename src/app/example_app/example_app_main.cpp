@@ -42,7 +42,7 @@
 #include <string.h>
 
 extern void lua_test(void);
-extern void html_test(void);
+static void html_test(void);
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -157,20 +157,6 @@ struct display_list {
 #define S 40
 
 #if 0
-struct display_list d_about[] = {
-	{ .sx = 6*S, .sy = 2*S,
-	  .mode = M_TEXT | M_BIG,
-	  .text = "Hello,", },
-	{ .y = 2*S, .sx = 6*S, .sy = 3*S,
-	  .mode = M_TEXT | M_SMALL,
-	  .text = "Even wristwatch should run free\n"
-	          "software. Esp32 means it really\n"
-	          "is a small computer." },
-	{ .y = 4*S, .sx = 6*S, .sy = 2*S,
-	  .mode = M_TEXT,
-	  .text = "Good luck :-)\n[Close]" },	
-};
-
 struct display_list d_wait[] = {
 	{ .sx = 6*S, .sy = 2*S,
 	  .mode = M_TEXT | M_BIG,
@@ -296,7 +282,7 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
     case S_MAIN:
 	    switch (y) {
 	    case 0 ... 2*S-1:
-		    state = S_ABOUT; display(d_about, sizeof(d_about)/sizeof(*d_about));
+		    state = S_ABOUT; //display(d_about, sizeof(d_about)/sizeof(*d_about));
 		    //lua_test();
 		    html_test();
 		    break;
@@ -678,6 +664,29 @@ struct link {
 
 #define ISWHITE(i) (i == ' ')
 
+struct document {
+	int dl_len;
+	struct display_list dl[100];
+	struct point cur;
+};
+
+struct document this_document = {
+	.dl_len = 3,
+	.dl = {
+	{ .sx = 6*S, .sy = 2*S,
+	  .mode = M_TEXT | M_BIG,
+	  .text = "Hello,", },
+	{ .y = 2*S, .sx = 6*S, .sy = 3*S,
+	  .mode = M_TEXT | M_SMALL,
+	  .text = "Even wristwatch should run free\n"
+	          "software. Esp32 means it really\n"
+	          "is a small computer." },
+	{ .y = 4*S, .sx = 6*S, .sy = 2*S,
+	  .mode = M_TEXT,
+	  .text = "Good luck :-)\n[Close]" },	
+	}
+};
+
 struct point emit_pos(void)
 {
 	struct point res = {};
@@ -850,7 +859,12 @@ int parse_html(char *html, char *out)
 	}
 }
 
-void html_test(void)
+static void display_html(char *html)
+{
+	display(this_document.dl, this_document.dl_len);
+}
+
+static void html_test(void)
 {
 	char html[10240];
 	char out[10240];
@@ -861,6 +875,7 @@ void html_test(void)
 	html[size] = 0;
 
 	parse_html(html, out);
-#endif
 	parse_html("<p>This is a small test. <a href=\"somewhere\">Links should somehow work.</a> I really should do some kind of word-wrapping in here. <small>Small font enables way more information to fit on screen, which can be quite useful with tiny screen of smartwatch.</small> <p><big>Hello</big><p>Newlines\nin\nsource\ntext\nshould\nbe\nignored\nand\ntext\nshould\nflow. <p><big>OTOHtooLongWordsMayNeedToBeSplit</big>", out);
+#endif
+	display_html("<p>Hello world");
 }
