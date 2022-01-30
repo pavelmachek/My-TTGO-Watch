@@ -1,3 +1,4 @@
+/* -*- linux-c -*- */
 /****************************************************************************
  *   Aug 3 12:17:11 2020
  *   Copyright  2020  Dirk Brosswick
@@ -37,7 +38,11 @@
 
 #include "utils/uri_load/uri_load.h"
 
+#include <stdio.h>
+#include <string.h>
+
 extern void lua_test(void);
+extern void html_test(void);
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -292,7 +297,8 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    switch (y) {
 	    case 0 ... 2*S-1:
 		    state = S_ABOUT; display(d_about, sizeof(d_about)/sizeof(*d_about));
-		    lua_test();
+		    //lua_test();
+		    html_test();
 		    break;
 	    case 2*S ... 4*S-1:
 		    state = S_WEATHER; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
@@ -651,4 +657,210 @@ void example_app_task( lv_task_t * task ) {
 #if 0
     fetch_url();
 #endif
+}
+
+
+#define S_TEXT 0
+#define S_TAG 1 /* < */
+#define S_ANCHOR 2 /* <a */
+#define S_AHREF 3 /* <a href=" */
+
+#define S_NORMAL 0
+#define S_SMALL 1
+#define S_BIG 2
+
+struct point { int y; };
+struct link {
+	char dest[128];
+	struct point start, end;
+	int tmp;
+};
+
+#define ISWHITE(i) (i == ' ')
+
+struct point emit_pos(void)
+{
+	struct point res = {};
+	return res;
+}
+
+int emit_text(char *start, char *end, int font)
+{
+	int i, limit = 13;
+	if (font == S_SMALL)
+		limit = 28;
+	if (font == S_BIG)
+		limit = 5;
+
+	printf(":: emit (%d): \n", limit);
+	for (i=0; i<limit; i++)
+		printf(":");
+	printf("\n");
+	while (1) {
+		int len;
+		int i;
+		if (ISWHITE(*start))
+			start++;
+		len = end-start;
+		if (limit > len)
+			limit = len;
+		if (!len) {
+			break;
+		}
+		i = limit;
+		while (!ISWHITE(start[i]) && i>0) {
+			i--;
+		}
+		if (i)
+			len = i;
+		else
+			len = limit;
+		for (i=0; i<len; i++)
+			printf("%c", *start++);
+		printf("\n");
+	}
+	printf("\n");
+}
+
+int parse_html(char *html, char *out)
+{
+	char *in = html;
+	int state = S_TEXT;
+	int textsize = S_NORMAL;
+	int len;
+	char *text_start = html;
+	char *ahref_start = NULL, *ahref_end = NULL;
+	struct link this_link;
+
+#define if_TOK(in, text) len = strlen(text); if (!strncmp(in, text, len))
+#define SKIP in += len
+#define NEW_STATE(st) state = st; text_start = in;
+
+	while (1) {
+		switch (state) {
+		case S_TEXT:
+			//printf("TEXT: %c\n", *in);
+			switch (*in++) {
+			case 0:
+				emit_text(text_start, in-1, textsize);
+				return 0;
+			case '<':
+				emit_text(text_start, in-1, textsize);
+				NEW_STATE(S_TAG);
+				continue;
+			default:
+				continue;
+			}
+		case S_TAG:
+			//printf("TAG: %c\n", *in);
+			if_TOK (in, "small>") {
+				SKIP;
+				textsize = S_SMALL;
+				NEW_STATE(S_TEXT);
+				continue;
+			}
+			if_TOK (in, "big>") {
+				SKIP;
+				textsize = S_BIG;
+				NEW_STATE(S_TEXT);
+				continue;
+			}
+			if_TOK (in, "/small>") {
+				SKIP;
+				textsize = S_NORMAL;
+				NEW_STATE(S_TEXT);
+				continue;
+			}
+			if_TOK (in, "/big>") {
+				SKIP;
+				textsize = S_NORMAL;
+				NEW_STATE(S_TEXT);
+				continue;
+			}
+			if_TOK (in, "p>") {
+				SKIP;
+				NEW_STATE(S_TEXT);
+				continue;
+			}
+			if_TOK (in, "a ") {
+				SKIP;
+				state = S_ANCHOR;
+				continue;
+			}
+			if_TOK (in, "/a>") {
+				SKIP;
+				NEW_STATE(S_TEXT);
+				this_link.end = emit_pos();
+				printf("?? Link finished, to: %s\n", this_link.dest);
+				continue;
+			}
+
+			switch (*in++) {
+			case 0:
+				printf("?? Text ends with a tag?!\n");
+				return 0;
+			case '>':
+				printf("?? Skipping unknown tag\n");
+				NEW_STATE(S_TEXT);
+				continue;
+			default:
+				continue;
+			}
+		case S_ANCHOR:
+			//printf("TAG: %c\n", *in);
+			if_TOK (in, "href=\"") {
+				SKIP;
+				state = S_AHREF;
+				memset(&this_link, 0, sizeof(this_link));
+				this_link.start = emit_pos();
+				ahref_start = in;
+				printf("?? got a href\n");
+				continue;
+			}
+
+			switch (*in++) {
+			case 0:
+				printf("?? Text ends in middle of anchor?!\n");
+				return 0;
+			case '>':
+				NEW_STATE(S_TEXT);
+				printf("?? ahref finished\n");
+				continue;
+			default:
+				continue;
+			}
+		case S_AHREF:
+			switch (*in++) {
+			case 0:
+				printf("?? Text ends in middle of ahref?!\n");
+				return 0;
+			case '"':
+				state = S_ANCHOR;
+				ahref_end = in;
+				printf("?? finished\n");
+				continue;
+			default:
+				this_link.dest[this_link.tmp++] = in[-1];
+				continue;
+			}			
+		default:
+			printf("Unknown state %d\n", state);
+			return -1;
+		}
+	}
+}
+
+void html_test(void)
+{
+	char html[10240];
+	char out[10240];
+	int size;
+#if 0
+	memset(html, 0, sizeof(html));
+	size = read(0, html, sizeof(html));
+	html[size] = 0;
+
+	parse_html(html, out);
+#endif
+	parse_html("<p>This is a small test. <a href=\"somewhere\">Links should somehow work.</a> I really should do some kind of word-wrapping in here. <small>Small font enables way more information to fit on screen, which can be quite useful with tiny screen of smartwatch.</small> <p><big>Hello</big><p>Newlines\nin\nsource\ntext\nshould\nbe\nignored\nand\ntext\nshould\nflow. <p><big>OTOHtooLongWordsMayNeedToBeSplit</big>", out);
 }
