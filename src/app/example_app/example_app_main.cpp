@@ -671,6 +671,7 @@ struct document {
 };
 
 struct document this_document = {
+#if 0
 	.dl_len = 3,
 	.dl = {
 	{ .sx = 6*S, .sy = 2*S,
@@ -685,6 +686,7 @@ struct document this_document = {
 	  .mode = M_TEXT,
 	  .text = "Good luck :-)\n[Close]" },	
 	}
+#endif
 };
 
 struct point emit_pos(void)
@@ -693,9 +695,22 @@ struct point emit_pos(void)
 	return res;
 }
 
+int text_height(int font)
+{
+	if (font == S_SMALL)
+		return 20;
+	if (font == S_BIG)
+		return 80;
+	return 40;
+}
+
 int emit_text(char *start, char *end, int font)
 {
 	int i, limit = 13;
+	int lines = 0;
+	char tmp[1024];
+	char *out = tmp;
+	
 	if (font == S_SMALL)
 		limit = 28;
 	if (font == S_BIG)
@@ -725,13 +740,30 @@ int emit_text(char *start, char *end, int font)
 		else
 			len = limit;
 		for (i=0; i<len; i++)
-			printf("%c", *start++);
-		printf("\n");
+			*out++ = *start++;
+		*out++ = '\n';
+		lines++;
 	}
-	printf("\n");
+	*out++ = 0;
+	printf("Output: Have %d lines\n", lines);
+
+	{
+		struct document *d = &this_document;
+		int h = text_height(font*lines);
+
+		d->dl[d->dl_len] = {};
+		d->dl[d->dl_len].y = d->cur.y;
+		d->dl[d->dl_len].sx = 240;
+		d->dl[d->dl_len].sy = h;
+		d->dl[d->dl_len].mode = M_TEXT;
+		d->dl[d->dl_len].text = strdup(tmp);
+
+		d->cur.y += h;
+		d->dl_len++;
+	}
 }
 
-int parse_html(char *html, char *out)
+int parse_html(char *html)
 {
 	char *in = html;
 	int state = S_TEXT;
@@ -861,6 +893,7 @@ int parse_html(char *html, char *out)
 
 static void display_html(char *html)
 {
+	parse_html("Hello");
 	display(this_document.dl, this_document.dl_len);
 }
 
