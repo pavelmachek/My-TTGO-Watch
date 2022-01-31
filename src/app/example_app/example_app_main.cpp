@@ -749,7 +749,7 @@ int emit_text(char *start, char *end, int font)
 
 	{
 		struct document *d = &this_document;
-		int h = text_height(font*lines);
+		int h = text_height(font)*lines;
 
 		d->dl[d->dl_len] = {};
 		d->dl[d->dl_len].y = d->cur.y;
@@ -893,6 +893,7 @@ int parse_html(char *html)
 
 static void display_html(char *html)
 {
+	this_document = {};
 	parse_html("Hello<p>This is about document on a smartwatch. It shows how html is displayed.<p>[Ok]");
 	display(this_document.dl, this_document.dl_len);
 }
