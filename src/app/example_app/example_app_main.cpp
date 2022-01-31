@@ -750,12 +750,17 @@ int emit_text(char *start, char *end, int font)
 	{
 		struct document *d = &this_document;
 		int h = text_height(font)*lines;
+		int m = M_TEXT;
 
 		d->dl[d->dl_len] = {};
 		d->dl[d->dl_len].y = d->cur.y;
 		d->dl[d->dl_len].sx = 240;
 		d->dl[d->dl_len].sy = h;
-		d->dl[d->dl_len].mode = M_TEXT;
+		if (font == S_SMALL)
+			m |= M_SMALL;
+		if (font == S_BIG)
+			m |= M_BIG;
+		d->dl[d->dl_len].mode = m;
 		d->dl[d->dl_len].text = strdup(tmp);
 
 		d->cur.y += h;
@@ -894,7 +899,7 @@ int parse_html(char *html)
 static void display_html(char *html)
 {
 	this_document = {};
-	parse_html("Hello<p>This is about document on a smartwatch. It shows how html is displayed.<p>[Ok]");
+	parse_html("About watch<p><small>This is about document on a smartwatch. It shows how html is displayed.</small><p>[Ok]");
 	display(this_document.dl, this_document.dl_len);
 }
 
