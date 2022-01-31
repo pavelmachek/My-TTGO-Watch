@@ -893,7 +893,7 @@ int parse_html(char *html)
 
 static void display_html(char *html)
 {
-	parse_html("Hello");
+	parse_html("Hello<p>This is about document on a smartwatch. It shows how html is displayed.<p>[Ok]");
 	display(this_document.dl, this_document.dl_len);
 }
 
