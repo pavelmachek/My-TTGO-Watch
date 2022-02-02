@@ -149,9 +149,10 @@ static void example_hibernate_cb( void ) {
 #define M_IMG 8
 
 struct display_list {
-  int x, y, sx, sy;
-  int mode;
-  char *text;
+	int x, y, sx, sy;
+	int mode;
+	char *text;
+	char *link;
 };
 
 #define S 40
@@ -660,6 +661,7 @@ struct link {
 	char dest[128];
 	struct point start, end;
 	int tmp;
+	int active;
 };
 
 #define ISWHITE(i) (i == ' ')
@@ -704,7 +706,7 @@ int text_height(int font)
 	return 40;
 }
 
-int emit_text(char *start, char *end, int font)
+int emit_text(char *start, char *end, int font, struct link this_link)
 {
 	int i, limit = 13;
 	int lines = 0;
@@ -762,6 +764,9 @@ int emit_text(char *start, char *end, int font)
 			m |= M_BIG;
 		d->dl[d->dl_len].mode = m;
 		d->dl[d->dl_len].text = strdup(tmp);
+		if (this_link.active) {
+			d->dl[d->dl_len].link = strdup(this_link.dest);
+		}
 
 		d->cur.y += h;
 		d->dl_len++;
@@ -788,10 +793,10 @@ int parse_html(char *html)
 			//printf("TEXT: %c\n", *in);
 			switch (*in++) {
 			case 0:
-				emit_text(text_start, in-1, textsize);
+				emit_text(text_start, in-1, textsize, this_link);
 				return 0;
 			case '<':
-				emit_text(text_start, in-1, textsize);
+				emit_text(text_start, in-1, textsize, this_link);
 				NEW_STATE(S_TAG);
 				continue;
 			default:
@@ -837,6 +842,7 @@ int parse_html(char *html)
 				SKIP;
 				NEW_STATE(S_TEXT);
 				this_link.end = emit_pos();
+				this_link.active = 0;
 				printf("?? Link finished, to: %s\n", this_link.dest);
 				continue;
 			}
@@ -859,6 +865,7 @@ int parse_html(char *html)
 				state = S_AHREF;
 				memset(&this_link, 0, sizeof(this_link));
 				this_link.start = emit_pos();
+				this_link.active = 1;
 				ahref_start = in;
 				printf("?? got a href\n");
 				continue;
@@ -899,7 +906,7 @@ int parse_html(char *html)
 static void display_html(char *html)
 {
 	this_document = {};
-	parse_html("About watch<p><small>This is about document on a smartwatch. It shows how html is displayed.</small><p>[Ok]");
+	parse_html("About watch<p><small>This is about document on a smartwatch. It shows how html is displayed.</small><p>[Ok]<p><a href=\"example\">[Go online]</a>");
 	display(this_document.dl, this_document.dl_len);
 }
 
