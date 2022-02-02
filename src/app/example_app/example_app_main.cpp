@@ -43,6 +43,7 @@
 
 extern void lua_test(void);
 static void html_test(void);
+static void display_html(char *html);
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -68,6 +69,7 @@ LV_FONT_DECLARE(Ubuntu_72px);
 #define S_ABOUT 1
 #define S_WEATHER 2
 #define S_REMOTE 3
+#define S_BROWSER 4
 int state;
 lv_obj_t *objects[16];
 
@@ -309,9 +311,8 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
     case S_MAIN:
 	    switch (y) {
 	    case 0 ... 2*S-1:
-		    state = S_ABOUT; //display(d_about, sizeof(d_about)/sizeof(*d_about));
-		    //lua_test();
-		    html_test();
+		    state = S_ABOUT; display(d_about, sizeof(d_about)/sizeof(*d_about));
+		    display_html("About watch<p><small>This is about document on a smartwatch. It shows how html is displayed.</small><p>[Ok]<p><a href=\"example\">[Go online]</a>");
 		    break;
 	    case 2*S ... 4*S-1:
 		    state = S_WEATHER; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
@@ -936,22 +937,7 @@ int parse_html(char *html)
 static void display_html(char *html)
 {
 	this_document = {};
-	parse_html("About watch<p><small>This is about document on a smartwatch. It shows how html is displayed.</small><p>[Ok]<p><a href=\"example\">[Go online]</a>");
+	parse_html(html);
 	display(this_document.dl, this_document.dl_len);
 }
 
-static void html_test(void)
-{
-	char html[10240];
-	char out[10240];
-	int size;
-#if 0
-	memset(html, 0, sizeof(html));
-	size = read(0, html, sizeof(html));
-	html[size] = 0;
-
-	parse_html(html, out);
-	parse_html("<p>This is a small test. <a href=\"somewhere\">Links should somehow work.</a> I really should do some kind of word-wrapping in here. <small>Small font enables way more information to fit on screen, which can be quite useful with tiny screen of smartwatch.</small> <p><big>Hello</big><p>Newlines\nin\nsource\ntext\nshould\nbe\nignored\nand\ntext\nshould\nflow. <p><big>OTOHtooLongWordsMayNeedToBeSplit</big>", out);
-#endif
-	display_html("<p>Hello world");
-}
