@@ -52,6 +52,8 @@ void display_link(char *link);
 
 #endif
 
+#define WEB_SERVER "http://10.0.0.9:8000/"
+
 lv_obj_t *example_app_main_tile = NULL;
 
 lv_task_t * _example_app_task;
@@ -92,6 +94,7 @@ int current_num;
 static void run_weather_task( lv_task_t * task );
 static void run_remote_task( lv_task_t * task );
 static void run_image_task( lv_task_t * task );
+static void run_html_task( lv_task_t * task );
 
 #define C_LONG 1
 #define C_INIT 2
@@ -293,15 +296,25 @@ char *get_document(char *link)
 {
 	printf("Have link: %s\n", link);
 	if (!strcmp(link, "l:main"))
-		return "<small>Main menu</small><p><a href=\"l:about\">[About]</a><p><a href=\"l:weather\">[Weather]</a><p><a href=\"l:web\">[Web]</a>";
+		return "<small>Main menu</small><p><a href=\"l:about\">[About]</a><p><a href=\"l:weather\">[Weather]</a><p><a href=\"" WEB_SERVER "\">[Web]</a>";
 	if (!strcmp(link, "l:about"))
 		return "About watch<p><small>This is about document on a smartwatch. It shows how html is displayed.</small><p><a href=\"l:main\">[Done]</a>";
 	return "Something went wrong: unknown document.<p><a href=\"l:main\">[Back to main]</a>";
 }
 
+char html_task_link[1024];
+
 void display_link(char *link)
 {
-	char *doc = get_document(link);
+	char *doc;
+	if (!strncmp(link, "http", 4)) {
+		lv_task_create( run_html_task, DELAY, LV_TASK_PRIO_MID, NULL );
+		strcpy(html_task_link, link);
+		display_html("loading remote page");
+		return;
+	}
+
+	doc = get_document(link);
 
 	display_html(doc);
 	fflush(stdout);
@@ -506,6 +519,30 @@ static void run_weather_task( lv_task_t * task ) {
     lv_task_del(task);
 }
 
+static void run_html_task( lv_task_t * task ) {
+	char url[128];
+	int r;
+
+	sprintf(url, "%s?x=%d&y=%d&type=%d&cookie=%s",
+		html_task_link,
+		click.x, click.y, click.type, click.cookie);
+	printf("Loading...%s\n", url); fflush(stdout);
+    
+	uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
+
+	printf("Got result loading uri\n", uri_load_dsc->size); fflush(stdout);
+
+#define SIZE 1024
+	static char data[SIZE], *t;
+	int s = uri_load_dsc->size;
+	if (s > SIZE-1)
+		s = SIZE-1;
+
+	memcpy(data, uri_load_dsc->data, s);
+	display_html(data);
+	lv_task_del(task);
+}
+
 static void run_remote_task( lv_task_t * task ) {
 	char url[128];
 	int r;
@@ -560,6 +597,7 @@ static void run_remote_task( lv_task_t * task ) {
     display(d_remote, sizeof(d_remote)/sizeof(*d_remote));
     lv_task_del(task);
 }
+
 
 static void run_image_task( lv_task_t * task ) {
 	char url[128];
