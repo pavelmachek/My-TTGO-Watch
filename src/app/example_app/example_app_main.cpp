@@ -155,6 +155,8 @@ static void handle_click(struct click click)
 			if (d->link) {
 				printf("Click within range, should follow %s\n", d->link);
 				display_link(d->link);
+				/* Data structures changed from under us! */
+				return;
 			}
 		}
 	}
@@ -289,11 +291,12 @@ static void display(display_list *display, int num)
 
 char *get_document(char *link)
 {
+	printf("Have link: %s\n", link);
 	if (!strcmp(link, "l:main"))
-		return "<small>Main menu</small><p><a href=\"l:about\">[About]</a>";
+		return "<small>Main menu</small><p><a href=\"l:about\">[About]</a><p><a href=\"l:weather\">[Weather]</a><p><a href=\"l:web\">[Web]</a>";
 	if (!strcmp(link, "l:about"))
-		return "About watch<p><small>This is about document on a smartwatch. It shows how html is displayed.</small><p><a href=\"l:main\">[Go online]</a>";
-	return "Something went wrong: unknown document";
+		return "About watch<p><small>This is about document on a smartwatch. It shows how html is displayed.</small><p><a href=\"l:main\">[Done]</a>";
+	return "Something went wrong: unknown document.<p><a href=\"l:main\">[Back to main]</a>";
 }
 
 void display_link(char *link)
@@ -301,6 +304,7 @@ void display_link(char *link)
 	char *doc = get_document(link);
 
 	display_html(doc);
+	fflush(stdout);
 }
 
 static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -323,7 +327,6 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    return;
     }
 
-    clear_screen();
     switch (state) {
     case S_MAIN:
 	    switch (y) {
@@ -332,11 +335,13 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 		    display_html("(Old about here, should not be reached");
 		    break;
 	    case 2*S ... 4*S-1:
+		    clear_screen();
 		    state = S_WEATHER; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
 		    lv_task_create( run_weather_task, DELAY, LV_TASK_PRIO_MID, NULL );
 		    break;
 	    case 4*S ... 6*S:
-	      click.type = C_INIT;
+		    click.type = C_INIT;
+		    clear_screen();
 		    state = S_REMOTE; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
 		    lv_task_create( run_remote_task, DELAY, LV_TASK_PRIO_MID, NULL );
 		    break;
@@ -344,10 +349,11 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    break;
     case S_WEATHER:
     case S_ABOUT:
-	    handle_click(click);
+	    clear_screen();
 	    state = S_MAIN; display(d_main, sizeof(d_main)/sizeof(*d_main));
 	    break;
     case S_REMOTE:
+	    clear_screen();
 	    lv_task_create( run_remote_task, DELAY, LV_TASK_PRIO_MID, NULL );
 	    break;
     case S_BROWSER:
@@ -958,6 +964,7 @@ int parse_html(char *html)
 static void display_html(char *html)
 {
 	this_document = {};
+	clear_screen();
 	parse_html(html);
 	display(this_document.dl, this_document.dl_len);
 }
