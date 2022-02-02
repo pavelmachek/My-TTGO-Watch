@@ -44,6 +44,7 @@
 extern void lua_test(void);
 static void html_test(void);
 static void display_html(char *html);
+void display_link(char *link);
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -144,7 +145,6 @@ static void handle_click(struct click click)
 	int i;
 	struct display_list *d;
 
-	printf("Click\n");
 	for (i=0; i<current_num; i++) {
 		d = current_display + i;
 
@@ -152,11 +152,12 @@ static void handle_click(struct click click)
 			continue;
 		if (click.x >= d->x && click.y >= d->y &&
 		    click.x <= d->x + d->sx && click.y <= d->y + d->sy) {
-			if (d->link)
+			if (d->link) {
 				printf("Click within range, should follow %s\n", d->link);
+				display_link(d->link);
+			}
 		}
 	}
-	printf("Click done\n");
 }
 
 static void clear_screen(void)
@@ -286,6 +287,22 @@ static void display(display_list *display, int num)
     }
 }
 
+char *get_document(char *link)
+{
+	if (!strcmp(link, "l:main"))
+		return "<small>Main menu</small><p><a href=\"l:about\">[About]</a>";
+	if (!strcmp(link, "l:about"))
+		return "About watch<p><small>This is about document on a smartwatch. It shows how html is displayed.</small><p><a href=\"l:main\">[Go online]</a>";
+	return "Something went wrong: unknown document";
+}
+
+void display_link(char *link)
+{
+	char *doc = get_document(link);
+
+	display_html(doc);
+}
+
 static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
     int x, y;
     x = obj->coords.x1;
@@ -312,7 +329,7 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    switch (y) {
 	    case 0 ... 2*S-1:
 		    state = S_ABOUT; display(d_about, sizeof(d_about)/sizeof(*d_about));
-		    display_html("About watch<p><small>This is about document on a smartwatch. It shows how html is displayed.</small><p>[Ok]<p><a href=\"example\">[Go online]</a>");
+		    display_html("(Old about here, should not be reached");
 		    break;
 	    case 2*S ... 4*S-1:
 		    state = S_WEATHER; display(d_wait, sizeof(d_wait)/sizeof(*d_wait));
@@ -332,6 +349,9 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    break;
     case S_REMOTE:
 	    lv_task_create( run_remote_task, DELAY, LV_TASK_PRIO_MID, NULL );
+	    break;
+    case S_BROWSER:
+	    handle_click(click);
 	    break;
     }
 }
@@ -378,7 +398,8 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_style_set_text_font( &example_app_big_style, LV_STATE_DEFAULT, &Ubuntu_72px);
     lv_obj_add_style( example_app_main_tile, LV_OBJ_PART_MAIN, &example_app_big_style );
 
-    state = S_MAIN; display(d_main, sizeof(d_main)/sizeof(*d_main));    
+    //state = S_MAIN; display(d_main, sizeof(d_main)/sizeof(*d_main));
+    state = S_BROWSER; display_link("l:main");
 
     {
       int x, y;
@@ -778,7 +799,7 @@ int emit_text(char *start, char *end, int font, struct link this_link)
 		lines++;
 	}
 	*out++ = 0;
-	dprintf("Output: Have %d lines\n", lines);
+	printf("Output: Have %d chars, %d lines, with link %s - %s\n", end-start, lines, this_link.dest, NULL);
 
 	{
 		struct document *d = &this_document;
@@ -812,7 +833,7 @@ int parse_html(char *html)
 	int len;
 	char *text_start = html;
 	char *ahref_start = NULL, *ahref_end = NULL;
-	struct link this_link;
+	struct link this_link = {};
 
 #define if_TOK(in, text) len = strlen(text); if (!strncmp(in, text, len))
 #define SKIP in += len
