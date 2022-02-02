@@ -141,7 +141,8 @@ static void handle_click(struct click click)
 {
 	int i;
 	struct display_list *d;
-	
+
+	printf("Click\n");
 	for (i=0; i<current_num; i++) {
 		d = current_display + i;
 
@@ -149,9 +150,11 @@ static void handle_click(struct click click)
 			continue;
 		if (click.x >= d->x && click.y >= d->y &&
 		    click.x <= d->x + d->sx && click.y <= d->y + d->sy) {
-			printf("Click within range, should follow %s\n", d->link);
+			if (d->link)
+				printf("Click within range, should follow %s\n", d->link);
 		}
 	}
+	printf("Click done\n");
 }
 
 static void clear_screen(void)
@@ -288,7 +291,7 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
     click.x = x;
     click.y = y;
     click.type = 0;
-    printf("obj @ %d %d\n", x, y);
+    //printf("obj @ %d %d\n", x, y);
     switch( event ) {
         case( LV_EVENT_SHORT_CLICKED ):
 	    printf("big_btn -- short\n"); fflush(stdout);
@@ -730,6 +733,8 @@ int text_height(int font)
 	return 40;
 }
 
+#define dprintf(a...) do {} while (0)
+
 int emit_text(char *start, char *end, int font, struct link this_link)
 {
 	int i, limit = 13;
@@ -742,10 +747,11 @@ int emit_text(char *start, char *end, int font, struct link this_link)
 	if (font == S_BIG)
 		limit = 5;
 
-	printf(":: emit (%d): \n", limit);
-	for (i=0; i<limit; i++)
-		printf(":");
-	printf("\n");
+	dprintf(":: emit (%d): \n", limit);
+	for (i=0; i<limit; i++) {
+		dprintf(":");
+	}
+	dprintf("\n");
 	while (1) {
 		int len;
 		int i;
@@ -771,7 +777,7 @@ int emit_text(char *start, char *end, int font, struct link this_link)
 		lines++;
 	}
 	*out++ = 0;
-	printf("Output: Have %d lines\n", lines);
+	dprintf("Output: Have %d lines\n", lines);
 
 	{
 		struct document *d = &this_document;
@@ -867,16 +873,16 @@ int parse_html(char *html)
 				NEW_STATE(S_TEXT);
 				this_link.end = emit_pos();
 				this_link.active = 0;
-				printf("?? Link finished, to: %s\n", this_link.dest);
+				dprintf("?? Link finished, to: %s\n", this_link.dest);
 				continue;
 			}
 
 			switch (*in++) {
 			case 0:
-				printf("?? Text ends with a tag?!\n");
+				dprintf("?? Text ends with a tag?!\n");
 				return 0;
 			case '>':
-				printf("?? Skipping unknown tag\n");
+				dprintf("?? Skipping unknown tag\n");
 				NEW_STATE(S_TEXT);
 				continue;
 			default:
@@ -897,11 +903,11 @@ int parse_html(char *html)
 
 			switch (*in++) {
 			case 0:
-				printf("?? Text ends in middle of anchor?!\n");
+				dprintf("?? Text ends in middle of anchor?!\n");
 				return 0;
 			case '>':
 				NEW_STATE(S_TEXT);
-				printf("?? ahref finished\n");
+				dprintf("?? ahref finished\n");
 				continue;
 			default:
 				continue;
@@ -909,19 +915,19 @@ int parse_html(char *html)
 		case S_AHREF:
 			switch (*in++) {
 			case 0:
-				printf("?? Text ends in middle of ahref?!\n");
+				dprintf("?? Text ends in middle of ahref?!\n");
 				return 0;
 			case '"':
 				state = S_ANCHOR;
 				ahref_end = in;
-				printf("?? finished\n");
+				dprintf("?? finished\n");
 				continue;
 			default:
 				this_link.dest[this_link.tmp++] = in[-1];
 				continue;
 			}			
 		default:
-			printf("Unknown state %d\n", state);
+			dprintf("Unknown state %d\n", state);
 			return -1;
 		}
 	}
