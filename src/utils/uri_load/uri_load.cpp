@@ -74,6 +74,8 @@
     #include <SPIFFS.h>
 #endif
 
+#define dprintf(a...) do {} while(0)
+
 uri_load_dsc_t *uri_load_create_dsc( void );
 void uri_load_set_filename_from_uri( uri_load_dsc_t *uri_load_dsc, const char *uri );
 void uri_load_set_url_from_uri( uri_load_dsc_t *uri_load_dsc, const char *uri );
@@ -127,7 +129,7 @@ uri_load_dsc_t *uri_load_to_ram( const char *uri, progress_cb_t *progresscb ) {
         }
         else {
             URI_LOAD_ERROR_LOG("uri not supported");
-	    printf("Uri is: %s\n", uri);
+	    dprintf("Uri is: %s\n", uri);
             uri_load_free_all( uri_load_dsc );
             uri_load_dsc = NULL;
         }
@@ -385,21 +387,21 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
          * request successfull?
          */
         if ( httpCode > 0 && httpCode == HTTP_CODE_OK  ) {
-	  printf("http code ok\n");
+	  dprintf("http code ok\n");
             /**
              * get file size and alloc memory for the file
              */
             uri_load_dsc->size = download_client.getSize();
-	    printf("url: size %d\n", uri_load_dsc->size);
+	    dprintf("url: size %d\n", uri_load_dsc->size);
 	    
 	    if (uri_load_dsc->size < 0 || uri_load_dsc->size > 0xffffff) {
-	      printf("url: don't have size, assuming some\n");
+	      dprintf("url: don't have size, assuming some\n");
 	      uri_load_dsc->size = 8196;
 	    }
             uri_load_dsc->data = (uint8_t*)CALLOC( 1, uri_load_dsc->size + 1 );
             URI_LOAD_LOG("uri_load_dsc->data: alloc %d bytes at %p", uri_load_dsc->size, uri_load_dsc->data );
 
-            printf("uri_load_dsc->data: alloc %d bytes at %p", uri_load_dsc->size, uri_load_dsc->data );	    
+            dprintf("uri_load_dsc->data: alloc %d bytes at %p", uri_load_dsc->size, uri_load_dsc->data );	    
             /**
              * check if alloc success
              */
@@ -437,7 +439,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
 #endif
             }
             else {
-	      printf("data failed here?\n");
+	      dprintf("data failed here?\n");
                 URI_LOAD_ERROR_LOG("data alloc failed, %d bytes", uri_load_dsc->size );
                 download_client.end();
                 uri_load_free_all( uri_load_dsc );

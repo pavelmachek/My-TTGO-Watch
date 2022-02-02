@@ -531,6 +531,12 @@ static void run_html_task( lv_task_t * task ) {
     
 	uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
 
+	if (!uri_load_dsc) {
+		display_html("URL load failed<p><a href=\"l:main\">[Back to main]</a>");
+		lv_task_del(task);
+		return;		
+	}
+
 	printf("Got result loading uri\n", uri_load_dsc->size); fflush(stdout);
 
 #define SIZE 1024
