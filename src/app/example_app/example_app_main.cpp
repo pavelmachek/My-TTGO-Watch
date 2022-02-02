@@ -53,6 +53,7 @@ void display_link(char *link);
 #endif
 
 #define WEB_SERVER "http://10.0.0.9:8000/"
+#define NN(a) ((void *)a) ? ((void *)a) : "(null)"
 
 lv_obj_t *example_app_main_tile = NULL;
 
@@ -74,7 +75,7 @@ LV_FONT_DECLARE(Ubuntu_72px);
 #define S_REMOTE 3
 #define S_BROWSER 4
 int state;
-lv_obj_t *objects[16];
+lv_obj_t *objects[16] = {};
 
 #define M_TEXT 1
 #define M_BIG 2
@@ -156,7 +157,7 @@ static void handle_click(struct click click)
 		if (click.x >= d->x && click.y >= d->y &&
 		    click.x <= d->x + d->sx && click.y <= d->y + d->sy) {
 			if (d->link) {
-				printf("Click within range, should follow %s\n", d->link);
+				printf("Click within range, should follow %s\n", NN(d->link));
 				display_link(d->link);
 				/* Data structures changed from under us! */
 				return;
@@ -488,7 +489,7 @@ static void run_weather_task( lv_task_t * task ) {
 	    return;
     }
 
-    printf("Got it... %d bytes, %s\n", uri_load_dsc->size, uri_load_dsc->data); fflush(stdout);
+    printf("Got it... %d bytes, %s\n", uri_load_dsc->size, NN(uri_load_dsc->data)); fflush(stdout);
     clear_screen();
 #define SIZE 1024
     static char data[SIZE];
@@ -564,7 +565,7 @@ static void run_remote_task( lv_task_t * task ) {
 	    return;
     }
 
-    printf("Got it... %d bytes, %s\n", uri_load_dsc->size, uri_load_dsc->data); fflush(stdout);
+    printf("Got it... %d bytes, %s\n", uri_load_dsc->size, NN(uri_load_dsc->data)); fflush(stdout);
     clear_screen();
 #define SIZE 1024
     static char data[SIZE], *t;
@@ -799,9 +800,10 @@ int text_height(int font)
 	return 40;
 }
 
-#define dprintf(a...) do {} while (0)
+//#define dprintf(a...) do {} while (0)
+#define dprintf(a...) do { printf(a);  } while (0)
 
-int emit_text(char *start, char *end, int font, struct link this_link)
+void emit_text(char *start, char *end, int font, struct link this_link)
 {
 	int i, limit = 13;
 	int lines = 0;
@@ -843,7 +845,7 @@ int emit_text(char *start, char *end, int font, struct link this_link)
 		lines++;
 	}
 	*out++ = 0;
-	printf("Output: Have %d chars, %d lines, with link %s - %s\n", end-start, lines, this_link.dest, NULL);
+	printf("Output: Have %d chars, %d lines, with link %s\n", end-start, lines, NN(this_link.dest));
 
 	{
 		struct document *d = &this_document;
@@ -939,7 +941,7 @@ int parse_html(char *html)
 				NEW_STATE(S_TEXT);
 				this_link.end = emit_pos();
 				this_link.active = 0;
-				dprintf("?? Link finished, to: %s\n", this_link.dest);
+				dprintf("?? Link finished, to: %s\n", NN(this_link.dest));
 				continue;
 			}
 
