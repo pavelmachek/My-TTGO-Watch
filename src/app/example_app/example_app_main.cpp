@@ -69,7 +69,22 @@ LV_FONT_DECLARE(Ubuntu_72px);
 #define S_WEATHER 2
 #define S_REMOTE 3
 int state;
-lv_obj_t *objects[128];
+lv_obj_t *objects[16];
+
+#define M_TEXT 1
+#define M_BIG 2
+#define M_SMALL 4
+#define M_IMG 8
+
+struct display_list {
+	int x, y, sx, sy;
+	int mode;
+	char *text;
+	char *link;
+};
+
+struct display_list *current_display;
+int current_num;
 
 static void run_weather_task( lv_task_t * task );
 static void run_remote_task( lv_task_t * task );
@@ -122,6 +137,23 @@ bool example_app_touch_event_cb( EventBits_t event, void *arg ) {
     return( false );
 }
 
+static void handle_click(struct click click)
+{
+	int i;
+	struct display_list *d;
+	
+	for (i=0; i<current_num; i++) {
+		d = current_display + i;
+
+		if (!d->sx)
+			continue;
+		if (click.x >= d->x && click.y >= d->y &&
+		    click.x <= d->x + d->sx && click.y <= d->y + d->sy) {
+			printf("Click within range, should follow %s\n", d->link);
+		}
+	}
+}
+
 static void clear_screen(void)
 {
   int i;
@@ -143,17 +175,6 @@ static void example_hibernate_cb( void ) {
   printf("hibernate\n"); fflush(stdout);
 }
 
-#define M_TEXT 1
-#define M_BIG 2
-#define M_SMALL 4
-#define M_IMG 8
-
-struct display_list {
-	int x, y, sx, sy;
-	int mode;
-	char *text;
-	char *link;
-};
 
 #define S 40
 
@@ -221,6 +242,8 @@ static lv_obj_t *lvo_img;
 
 static void display(display_list *display, int num)
 {
+	current_display = display;
+	current_num = num;
     for (int i=0; i<num; i++) {
 	    struct display_list *l = display+i;
 	    lv_obj_t *lvo = NULL;
@@ -300,6 +323,7 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    break;
     case S_WEATHER:
     case S_ABOUT:
+	    handle_click(click);
 	    state = S_MAIN; display(d_main, sizeof(d_main)/sizeof(*d_main));
 	    break;
     case S_REMOTE:
