@@ -371,6 +371,8 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    lv_task_create( run_remote_task, DELAY, LV_TASK_PRIO_MID, NULL );
 	    break;
     case S_BROWSER:
+	    if (event == LV_EVENT_LONG_PRESSED)
+		    display_link("l:main");
 	    handle_click(click);
 	    break;
     }
