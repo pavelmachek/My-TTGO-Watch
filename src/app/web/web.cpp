@@ -69,7 +69,7 @@ void web_setup( void ) {
     // remember, an app icon must have an size of 64x64 pixel with an alpha channel
     // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
     // the resulting c-file can put in /app/webs/images/ and declare it like LV_IMG_DECLARE( your_icon );
-    web = app_register( "myapp", &web_64px, enter_web_event_cb );
+    web = app_register( "web", &web_64px, enter_web_event_cb );
     app_set_indicator( web, ICON_INDICATOR_OK );
 
 #ifdef WEB_WIDGET
