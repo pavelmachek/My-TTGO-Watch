@@ -67,7 +67,7 @@ static void enter_countdown_event_cb( lv_obj_t * obj, lv_event_t event );
 
 static void create_countdown_app_icon(){
     // create an app icon, label it and get the lv_obj_t icon container
-    lv_obj_t * countdown_icon_cont = app_tile_register_app( "alarm");
+    lv_obj_t * countdown_icon_cont = app_tile_register_app( "countdown");
     // set your own icon and register her callback to activate by an click
     // remember, an app icon must have an size of 64x64 pixel with an alpha channel
     // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
