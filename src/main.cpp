@@ -23,6 +23,7 @@
 #include "app/fx_rates/fx_rates.h"
 #include "app/IRController/IRController.h"
 #include "app/alarm_clock/alarm_clock.h"
+#include "app/countdown/countdown.h"
 
 #if defined( NATIVE_64BIT )
     /**
@@ -55,6 +56,7 @@ void setup() {
     stopwatch_app_setup();
     astro_app_setup();
     alarm_clock_setup();
+    countdown_setup();
     activity_app_setup();
     calendar_app_setup();
     mail_app_setup();
