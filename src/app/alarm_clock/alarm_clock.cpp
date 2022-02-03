@@ -160,7 +160,7 @@ bool alarm_occurred_event_event_callback ( EventBits_t event, void *arg  ){
     return( true );
 }
 
-bool powermgmt_callback( EventBits_t event, void *arg  ){
+static bool powermgmt_callback( EventBits_t event, void *arg  ){
     switch( event ) {
         case( POWERMGM_STANDBY ):
             alarm_in_progress_finish_alarm();
