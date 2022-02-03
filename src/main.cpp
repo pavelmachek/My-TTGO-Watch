@@ -7,6 +7,7 @@
 #include "app/calc/calc_app.h"
 #include "app/FindPhone/FindPhone.h"
 #include "app/example_app/example_app.h"
+#include "app/web/web.h"
 #include "app/gps_status/gps_status.h"
 #include "app/kodi_remote/kodi_remote_app.h"
 #include "app/osmand/osmand_app.h"
@@ -69,6 +70,8 @@ void setup() {
     powermeter_app_setup();
 #endif    
     example_app_setup();
+    extern void web_setup(void);
+    web_setup();
 #if 0
     FindPhone_setup();
     wifimon_app_setup();
