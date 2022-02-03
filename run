@@ -1,8 +1,8 @@
 PATH=$PATH:~/.local/bin
 if [ .$1 == .emu ]; then
-    platformio run && .pio/build/emulator_twatch2020/program
+    nice platformio run && .pio/build/emulator_twatch2020/program
 else
     sudo chown pavel /dev/ttyUSB0 
-    platformio run -t upload
+    nice platformio run -t upload
 fi
 # platformio run -t cleanall
