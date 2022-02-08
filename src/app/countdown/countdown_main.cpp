@@ -168,6 +168,13 @@ void countdown_main_setup( uint32_t tile_num ) {
     lv_obj_set_width(minute_roller, 90);
     lv_obj_set_height( minute_roller, 90 );
 
+    countdown_app_main_countdownlabel = lv_label_create( roller_container , NULL);
+    lv_label_set_text(countdown_app_main_countdownlabel, "00:00");
+    lv_obj_reset_style_list( countdown_app_main_countdownlabel, LV_OBJ_PART_MAIN );
+    lv_obj_add_style( countdown_app_main_countdownlabel, LV_OBJ_PART_MAIN, APP_STYLE );
+    lv_obj_align(countdown_app_main_countdownlabel, NULL, LV_ALIGN_CENTER, 0, 0);
+    
+
     lv_obj_t *exit_btn = wf_add_exit_button( main_tile );
     lv_obj_align(exit_btn, main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
 
