@@ -201,6 +201,6 @@ char * countdown_get_clock_label(bool show_day)
 {
     static char text[LABEL_MAX_SIZE]; //DoW + '\n' + HH:MMA  + '\0'
 
-    snprintf(text, LABEL_MAX_SIZE, "---\n--:--");
+    snprintf(text, LABEL_MAX_SIZE, "count\ndown");
     return text;
 }

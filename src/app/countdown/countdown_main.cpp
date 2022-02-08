@@ -34,7 +34,6 @@
 
 lv_obj_t *countdown_app_main_start_btn = NULL;
 lv_obj_t *countdown_app_main_stop_btn = NULL;
-lv_obj_t *countdown_enabled_switch = NULL;
 lv_obj_t *countdown_app_main_countdownlabel = NULL;
 
 #define ROLLER_ROW_COUNT 4
@@ -96,7 +95,7 @@ void countdown_app_task( lv_task_t * task ) {
 
     time_t now = time(0);
     double dif_seconds = difftime(now,prev_time);
-    countdown_milliseconds += dif_seconds * 1000;
+    countdown_milliseconds -= dif_seconds * 1000;
     prev_time = now;
 
     countdown_app_main_update_countdownlabel();
@@ -120,6 +119,12 @@ void countdown_start(void)
 {
 	// create an task that runs every secound
 	prev_time = time(0);
+
+	int hour = lv_roller_get_selected(hour_roller);
+	int minute = lv_roller_get_selected(minute_roller);
+
+	prev_time += hour*60 + minute;
+	
 	_countdown_app_task = lv_task_create( countdown_app_task, 1000, LV_TASK_PRIO_MID, NULL );
 	lv_obj_set_hidden(countdown_app_main_start_btn, true);
 	lv_obj_set_hidden(countdown_app_main_stop_btn, false);
@@ -154,14 +159,10 @@ static void stop_countdown_app_main_event_cb( lv_obj_t * obj, lv_event_t event )
 
 void countdown_main_setup( uint32_t tile_num ) {
     lv_obj_t * main_tile = mainbar_get_tile_obj( tile_num );
-    
-    lv_obj_t * countdown_onoff_cont = wf_add_labeled_switch( main_tile, "Activated", &countdown_enabled_switch, true, NULL, APP_STYLE );
-    lv_obj_align( countdown_onoff_cont, main_tile, LV_ALIGN_IN_TOP_MID, THEME_ICON_PADDING, THEME_ICON_PADDING );
 
     lv_obj_t *roller_container = wf_add_container(main_tile, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT, false, APP_STYLE );
     lv_obj_set_style_local_pad_left( roller_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, 1);
     lv_obj_set_style_local_pad_right( roller_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, 1);
-    lv_obj_align( roller_container, countdown_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
 
     hour_roller = wf_add_roller( roller_container, get_roller_content(24, false, !clock_format_24), LV_ROLLER_MODE_INIFINITE, ROLLER_ROW_COUNT );
     lv_obj_set_width( hour_roller, 90 );
@@ -207,26 +208,12 @@ void countdown_main_setup( uint32_t tile_num ) {
 }
 
 void countdown_main_set_data_to_display(rtcctl_alarm_t *countdown_data, bool clock_24){
-    if (clock_format_24 != clock_24){
-        clock_format_24 = clock_24;
-        lv_roller_set_options(hour_roller, get_roller_content(24, false, !clock_24) , LV_ROLLER_MODE_INIFINITE);
-    }
-    lv_roller_set_selected(hour_roller, countdown_data->hour, LV_ANIM_OFF);
-    lv_roller_set_selected(minute_roller, countdown_data->minute, LV_ANIM_OFF);
-
-    if (countdown_data->enabled){
-        lv_switch_on(countdown_enabled_switch, LV_ANIM_OFF);
-    }
-    else{
-        lv_switch_off(countdown_enabled_switch, LV_ANIM_OFF);
-    }
+    lv_roller_set_selected(hour_roller, 5, LV_ANIM_OFF);
+    lv_roller_set_selected(minute_roller, 0, LV_ANIM_OFF);
 }
 
 rtcctl_alarm_t *countdown_main_get_data_to_store(){
     static rtcctl_alarm_t data = {};
-    data.enabled = lv_switch_get_state(countdown_enabled_switch);
-    data.hour = lv_roller_get_selected(hour_roller);
-    data.minute = lv_roller_get_selected(minute_roller);
     
     return &data;
 }
