@@ -48,9 +48,6 @@
 
 #define LABEL_MAX_SIZE 11
 
-static const char countdown_week_day_2[7][3] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
-static const char countdown_week_day_3[7][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-
 // declare you images or fonts you need
 LV_IMG_DECLARE(countdown_64px);
 LV_IMG_DECLARE(countdown_48px);
@@ -213,29 +210,6 @@ static void enter_countdown_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 countdown_properties_t * countdown_get_properties(){
     return &properties;
-}
-
-int countdown_get_am_pm_hour(int hour24){
-    //FIXME: taken from main_tile.cpp. It would be good to place common function somewhere and use it on both places
-    if (hour24 == 0){
-        return 12;
-    }
-    if (hour24 > 12){
-        return hour24 - 12;
-    }
-    return hour24;
-}
-
-char const* countdown_get_am_pm_value(int hour24, bool short_format){
-    if (hour24 < 12){
-        return short_format ? AM_ONE : AM;
-    }
-
-    return short_format ? PM_ONE : PM;
-}
-
-char const * countdown_get_week_day(int index, bool short_format){
-    return short_format ? countdown_week_day_2[index] : countdown_week_day_3[index];
 }
 
 char * countdown_get_clock_label(bool show_day)

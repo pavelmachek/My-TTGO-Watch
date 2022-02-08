@@ -47,9 +47,6 @@ static char* get_roller_content(int count, bool zeros, bool am_pm_roller){
     int pos = 0;
     for (int index = 0; index < count; ++index){
         int number = index;
-        if (am_pm_roller){
-            number = countdown_get_am_pm_hour(number);
-        }
 
         if (number < 10){
             if (zeros){
@@ -61,13 +58,6 @@ static char* get_roller_content(int count, bool zeros, bool am_pm_roller){
         }
 
         content[pos++] = '0' + number % 10;
-        if (am_pm_roller){
-            content[pos++] = ' ';
-            char const *am_pm_value = countdown_get_am_pm_value(index, false);
-            strcpy(content + pos, am_pm_value);
-            pos += strlen(am_pm_value);
-        }
-
         content[pos++] = (index == count - 1 ? '\0' : '\n');
     }
     return content;
