@@ -118,33 +118,33 @@ void countdown_remove_widget(void) {}
 
 void countdown_start(void)
 {
-       // create an task that runs every secound
-                                        prev_time = time(0);
-                                        _countdown_app_task = lv_task_create( countdown_app_task, 1000, LV_TASK_PRIO_MID, NULL );
-                                        lv_obj_set_hidden(countdown_app_main_start_btn, true);
-                                        lv_obj_set_hidden(countdown_app_main_stop_btn, false);
-                                        countdown_add_widget();
-                                        //countdown_app_hide_app_icon_info( false );
+	// create an task that runs every secound
+	prev_time = time(0);
+	_countdown_app_task = lv_task_create( countdown_app_task, 1000, LV_TASK_PRIO_MID, NULL );
+	lv_obj_set_hidden(countdown_app_main_start_btn, true);
+	lv_obj_set_hidden(countdown_app_main_stop_btn, false);
+	countdown_add_widget();
+	//countdown_app_hide_app_icon_info( false );
 }
 
 static void start_countdown_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
+	switch( event ) {
         case( LV_EVENT_CLICKED ):
 		countdown_start();
 		break;
-    }
+	}
 }
 
 static void stop_countdown_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
+	switch( event ) {
         case( LV_EVENT_CLICKED ):       // create an task that runs every secound
-                                        lv_task_del(_countdown_app_task);
-                                        lv_obj_set_hidden(countdown_app_main_start_btn, false);
-                                        lv_obj_set_hidden(countdown_app_main_stop_btn, true);
-                                        countdown_remove_widget();
-                                        //countdown_app_hide_app_icon_info( true );
-                                        break;
-    }
+		lv_task_del(_countdown_app_task);
+		lv_obj_set_hidden(countdown_app_main_start_btn, false);
+		lv_obj_set_hidden(countdown_app_main_stop_btn, true);
+		countdown_remove_widget();
+		//countdown_app_hide_app_icon_info( true );
+		break;
+	}
 }
 
 void countdown_main_setup( uint32_t tile_num ) {
