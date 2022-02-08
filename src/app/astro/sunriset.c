@@ -149,11 +149,11 @@ void sunrise_display_callback( char *buf, int len, int flags )
       now = *localtime(&now_t);
       //zone = now.tm_gmtoff / 3600; // only works on emulator
       zone = now.tm_hour;
-      if (zone < -12)
-	zone += 24;
       now = *gmtime(&now_t);
       now_hour = now.tm_hour + now.tm_min / 60.;
       zone -= now.tm_hour;
+      if (zone < -12)
+	zone += 24;
 
       printf("Zone: %d\n", zone);
 
