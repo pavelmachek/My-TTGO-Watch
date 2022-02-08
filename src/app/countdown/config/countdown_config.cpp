@@ -32,7 +32,6 @@ bool countdown_properties_t::onSave(JsonDocument& doc) {
     doc[BEEP_KEY] = beep;
     doc[FADE_KEY] = fade;
     doc[VIBE_KEY] = vibe;
-    doc[SHOW_ON_MAIN_TILE_KEY] = show_on_main_tile;
 
     return( true );
 }
@@ -41,7 +40,6 @@ bool countdown_properties_t::onLoad(JsonDocument& doc) {
     beep = doc[BEEP_KEY] | true;
     fade = doc[FADE_KEY] | true;
     vibe = doc[VIBE_KEY] | true;
-    show_on_main_tile = doc[SHOW_ON_MAIN_TILE_KEY] | true;
 
     return( true );
 }
@@ -50,7 +48,6 @@ bool countdown_properties_t::onDefault( void ) {
     beep = true;
     fade = true;
     vibe = true;
-    show_on_main_tile = true;
 
     return( true );
 }

@@ -116,20 +116,6 @@ static void add_main_tile_widget(){
     update_main_tile_widget_label();
 }
 
-static void setup_tile_hibernate_callback (){
-    log_d("countdown_setup_is_main_tile_switch_on(): %d, properties.show_on_main_tile: %d", countdown_setup_is_main_tile_switch_on(), properties.show_on_main_tile);
-    if (countdown_setup_is_main_tile_switch_on() != properties.show_on_main_tile) {
-        if (countdown_setup_is_main_tile_switch_on()){
-            add_main_tile_widget();
-        }
-        else{
-            remove_main_tile_widget();
-        }
-    }
-    properties = *countdown_setup_get_data_to_store();
-    properties.save();
-}
-
 static void create_countdown_main_tile(uint32_t tile_num ){
     countdown_main_setup( main_tile_num );
     mainbar_add_tile_activate_cb(tile_num, main_tile_activate_callback);
@@ -138,8 +124,6 @@ static void create_countdown_main_tile(uint32_t tile_num ){
 
 static void create_countdown_setup_tile(uint32_t tile_num){
     countdown_setup_setup( tile_num );
-    mainbar_add_tile_activate_cb(tile_num, setup_tile_activate_callback);
-    mainbar_add_tile_hibernate_cb(tile_num, setup_tile_hibernate_callback);
 }
 
 static void create_done_in_progress_tile(){
@@ -175,7 +159,8 @@ void countdown_setup( void ) {
     properties.load();
 
     create_countdown_app_icon();
-    if (properties.show_on_main_tile){
+    {
+      /* Do this on activation */
         add_main_tile_widget();
     }
     // register 2 vertical tiles and get the first tile number and save it for later use

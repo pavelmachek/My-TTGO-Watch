@@ -24,19 +24,12 @@
 
     #include "utils/basejsonconfig.h"
 
-    #define COUNTDOWN_CLOCK_JSON_CONFIG_FILE   "/alaram.json"   /** @brief defines json config file name */
+    #define COUNTDOWN_CLOCK_JSON_CONFIG_FILE   "/countdown.json"   /** @brief defines json config file name */
 
     #define VERSION_KEY "version"
     #define BEEP_KEY "beep"
     #define FADE_KEY "fade"
     #define VIBE_KEY "vibe"
-    #define SHOW_ON_MAIN_TILE_KEY "show_on_main_tile_key"
-
-    #define AM "AM"
-    #define PM "PM"
-
-    #define AM_ONE "A"
-    #define PM_ONE "P"
 
     /**
      * @brief alarm properties structure
@@ -47,7 +40,6 @@
         bool beep;
         bool fade;
         bool vibe;
-        bool show_on_main_tile;
 
         protected:
         ////////////// Available for overloading: //////////////

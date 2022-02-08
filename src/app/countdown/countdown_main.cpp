@@ -32,13 +32,21 @@
 #include "gui/widget_styles.h"
 #include "hardware/rtcctl.h"
 
+lv_obj_t *countdown_app_main_start_btn = NULL;
+lv_obj_t *countdown_app_main_stop_btn = NULL;
 lv_obj_t *countdown_enabled_switch = NULL;
+lv_obj_t *countdown_app_main_countdownlabel = NULL;
 
 #define ROLLER_ROW_COUNT 4
 
 static bool clock_format_24 = false;
 static lv_obj_t *hour_roller = NULL;
 static lv_obj_t *minute_roller = NULL;
+
+lv_task_t * _countdown_app_task;
+
+long countdown_milliseconds = 0;
+static time_t prev_time;
 
 static void enter_countdown_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
@@ -61,6 +69,82 @@ static char* get_roller_content(int count, bool zeros, bool am_pm_roller){
         content[pos++] = (index == count - 1 ? '\0' : '\n');
     }
     return content;
+}
+
+static void countdown_app_main_update_countdownlabel()
+{
+    //int hr = (countdown_milliseconds / (1000 * 60 * 60)) % 24;
+
+    // minutes
+    int min = (countdown_milliseconds / (1000 * 60)) % 60;
+
+    // seconds
+    int sec = (countdown_milliseconds / 1000) % 60;
+
+    // milliseconds
+    //int mill = countdown_milliseconds % 1000;
+
+    char msg[10];
+    sprintf(msg,"%02d:%02d", min, sec);
+
+    lv_label_set_text(countdown_app_main_countdownlabel, msg);
+    lv_obj_align(countdown_app_main_countdownlabel, NULL, LV_ALIGN_CENTER, 0, 0);
+    //countdown_app_update_widget_label( msg );
+}
+
+void countdown_app_task( lv_task_t * task ) {
+
+    time_t now = time(0);
+    double dif_seconds = difftime(now,prev_time);
+    countdown_milliseconds += dif_seconds * 1000;
+    prev_time = now;
+
+    countdown_app_main_update_countdownlabel();
+}
+
+/* FIXME: see countdown.c 
+
+static void remove_main_tile_widget(){
+    countdown_widget = widget_remove( countdown_widget );
+}
+
+static void add_main_tile_widget(){
+
+*/
+
+
+void countdown_add_widget(void) {}
+void countdown_remove_widget(void) {}
+
+void countdown_start(void)
+{
+       // create an task that runs every secound
+                                        prev_time = time(0);
+                                        _countdown_app_task = lv_task_create( countdown_app_task, 1000, LV_TASK_PRIO_MID, NULL );
+                                        lv_obj_set_hidden(countdown_app_main_start_btn, true);
+                                        lv_obj_set_hidden(countdown_app_main_stop_btn, false);
+                                        countdown_add_widget();
+                                        //countdown_app_hide_app_icon_info( false );
+}
+
+static void start_countdown_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):
+		countdown_start();
+		break;
+    }
+}
+
+static void stop_countdown_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):       // create an task that runs every secound
+                                        lv_task_del(_countdown_app_task);
+                                        lv_obj_set_hidden(countdown_app_main_start_btn, false);
+                                        lv_obj_set_hidden(countdown_app_main_stop_btn, true);
+                                        countdown_remove_widget();
+                                        //countdown_app_hide_app_icon_info( true );
+                                        break;
+    }
 }
 
 void countdown_main_setup( uint32_t tile_num ) {
@@ -87,6 +171,25 @@ void countdown_main_setup( uint32_t tile_num ) {
     lv_obj_t *exit_btn = wf_add_exit_button( main_tile );
     lv_obj_align(exit_btn, main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
 
+    countdown_app_main_start_btn = lv_btn_create(main_tile, NULL);  
+    lv_obj_set_size(countdown_app_main_start_btn, 50, 50);
+    lv_obj_add_style(countdown_app_main_start_btn, LV_IMGBTN_PART_MAIN, APP_STYLE );
+    lv_obj_align(countdown_app_main_start_btn, main_tile, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    lv_obj_set_event_cb( countdown_app_main_start_btn, start_countdown_app_main_event_cb );
+
+    lv_obj_t *countdown_app_main_start_btn_label = lv_label_create(countdown_app_main_start_btn, NULL);
+    lv_label_set_text(countdown_app_main_start_btn_label, LV_SYMBOL_PLAY);
+
+    countdown_app_main_stop_btn = lv_btn_create(main_tile, NULL);  
+    lv_obj_set_size(countdown_app_main_stop_btn, 50, 50);
+    lv_obj_add_style(countdown_app_main_stop_btn, LV_IMGBTN_PART_MAIN, APP_STYLE );
+    lv_obj_align(countdown_app_main_stop_btn, main_tile, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    lv_obj_set_event_cb( countdown_app_main_stop_btn, stop_countdown_app_main_event_cb );
+    lv_obj_set_hidden(countdown_app_main_stop_btn, true);
+
+    lv_obj_t *countdown_app_main_stop_btn_label = lv_label_create(countdown_app_main_stop_btn, NULL);
+    lv_label_set_text(countdown_app_main_stop_btn_label, LV_SYMBOL_STOP);
+    
     lv_obj_t *setup_btn = wf_add_setup_button( main_tile, enter_countdown_setup_event_cb );
     lv_obj_align(setup_btn, main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
 }
@@ -124,3 +227,4 @@ static void enter_countdown_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
             break;
     }
 }
+

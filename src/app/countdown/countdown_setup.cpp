@@ -63,7 +63,6 @@ void countdown_setup_set_data_to_display(countdown_properties_t *countdown_prope
     set_switch_state(vibe_switch, countdown_properties->vibe);
     set_switch_state(fade_switch, countdown_properties->fade);
     set_switch_state(beep_switch, countdown_properties->beep);
-    set_switch_state(main_tile_switch, countdown_properties->show_on_main_tile);
 }
 
 countdown_properties_t *countdown_setup_get_data_to_store(){
@@ -71,7 +70,6 @@ countdown_properties_t *countdown_setup_get_data_to_store(){
     properties.vibe = lv_switch_get_state(vibe_switch);
     properties.fade = lv_switch_get_state(fade_switch);
     properties.beep = lv_switch_get_state(beep_switch);
-    properties.show_on_main_tile = lv_switch_get_state(main_tile_switch);
     return &properties;
 }
 
