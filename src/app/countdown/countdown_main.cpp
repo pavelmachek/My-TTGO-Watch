@@ -72,37 +72,6 @@ static char* get_roller_content(int count, bool zeros, bool am_pm_roller){
     return content;
 }
 
-static void countdown_app_main_update_countdownlabel()
-{
-    // minutes
-    int min = (countdown_milliseconds / (1000 * 60)) % 60;
-
-    // seconds
-    int sec = (countdown_milliseconds / 1000) % 60;
-
-    char msg[10];
-    sprintf(msg,"%02d:%02d", min, sec);
-
-    if (countdown_milliseconds < 0) {
-	    sprintf(msg, "DONE");
-
-	    done_in_progress_start_alarm();
-    }
-
-    lv_label_set_text(countdown_app_main_countdownlabel, msg);
-    lv_obj_align(countdown_app_main_countdownlabel, NULL, LV_ALIGN_CENTER, 0, 0);
-    //countdown_app_update_widget_label( msg );
-}
-
-void countdown_app_task( lv_task_t * task ) {
-
-    time_t now = time(0);
-    double dif_seconds = difftime(now,prev_time);
-    countdown_milliseconds -= dif_seconds * 1000;
-    prev_time = now;
-
-    countdown_app_main_update_countdownlabel();
-}
 
 /* FIXME: see countdown.c 
 
@@ -117,6 +86,50 @@ static void add_main_tile_widget(){
 
 void countdown_add_widget(void) {}
 void countdown_remove_widget(void) {}
+
+void countdown_stop(void)
+{
+	lv_task_del(_countdown_app_task);
+	lv_obj_set_hidden(countdown_app_main_start_btn, false);
+	lv_obj_set_hidden(countdown_app_main_stop_btn, true);
+	countdown_remove_widget();
+	//countdown_app_hide_app_icon_info( true );
+}
+
+static void countdown_app_main_update_countdownlabel()
+{
+    // minutes
+    int min = (countdown_milliseconds / (1000 * 60)) % 60;
+
+    // seconds
+    int sec = (countdown_milliseconds / 1000) % 60;
+
+    char msg[10];
+    sprintf(msg,"%02d:%02d", min, sec);
+
+    if (countdown_milliseconds < 0) {
+	    sprintf(msg, "DONE");
+    }
+
+    lv_label_set_text(countdown_app_main_countdownlabel, msg);
+    lv_obj_align(countdown_app_main_countdownlabel, NULL, LV_ALIGN_CENTER, 0, 0);
+    //countdown_app_update_widget_label( msg );
+
+    if (countdown_milliseconds < 0) {
+	    done_in_progress_start_alarm();
+	    countdown_stop();
+    }
+}
+
+void countdown_app_task( lv_task_t * task ) {
+
+    time_t now = time(0);
+    double dif_seconds = difftime(now,prev_time);
+    countdown_milliseconds -= dif_seconds * 1000;
+    prev_time = now;
+
+    countdown_app_main_update_countdownlabel();
+}
 
 void countdown_start(void)
 {
@@ -133,15 +146,6 @@ void countdown_start(void)
 	lv_obj_set_hidden(countdown_app_main_stop_btn, false);
 	countdown_add_widget();
 	//countdown_app_hide_app_icon_info( false );
-}
-
-void countdown_stop(void)
-{
-	lv_task_del(_countdown_app_task);
-	lv_obj_set_hidden(countdown_app_main_start_btn, false);
-	lv_obj_set_hidden(countdown_app_main_stop_btn, true);
-	countdown_remove_widget();
-	//countdown_app_hide_app_icon_info( true );
 }
 
 static void start_countdown_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
