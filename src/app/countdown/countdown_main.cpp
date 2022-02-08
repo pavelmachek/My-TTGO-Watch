@@ -1,5 +1,6 @@
 /****************************************************************************
  *   Copyright  2020  Jakub Vesely
+ *   Copyright  2022  Pavel Machek
  *   Email: jakub_vesely@seznam.cz
  ****************************************************************************/
 
@@ -38,13 +39,6 @@ lv_obj_t *countdown_enabled_switch = NULL;
 static bool clock_format_24 = false;
 static lv_obj_t *hour_roller = NULL;
 static lv_obj_t *minute_roller = NULL;
-static lv_obj_t *monday_btn = NULL;
-static lv_obj_t *tuesday_btn = NULL;
-static lv_obj_t *wednesday_btn = NULL;
-static lv_obj_t *thursday_btn = NULL;
-static lv_obj_t *friday_btn = NULL;
-static lv_obj_t *saturday_btn = NULL;
-static lv_obj_t *sunday_btn = NULL;
 
 static void enter_countdown_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
@@ -85,24 +79,10 @@ void countdown_main_setup( uint32_t tile_num ) {
     lv_obj_t * countdown_onoff_cont = wf_add_labeled_switch( main_tile, "Activated", &countdown_enabled_switch, true, NULL, APP_STYLE );
     lv_obj_align( countdown_onoff_cont, main_tile, LV_ALIGN_IN_TOP_MID, THEME_ICON_PADDING, THEME_ICON_PADDING );
 
-    lv_obj_t * weekday_container = wf_add_container(main_tile, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT, false, APP_STYLE );
-    lv_obj_set_style_local_pad_inner( weekday_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, 1);
-    lv_obj_align( weekday_container, countdown_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_PADDING );
-
-    static const int day_btn_width = 28;
-    static const int day_btn_height = 29;
-    monday_btn = wf_add_button(weekday_container, countdown_get_week_day(1, true), day_btn_width, day_btn_height, NULL);
-    tuesday_btn = wf_add_button(weekday_container, countdown_get_week_day(2, true), day_btn_width, day_btn_height, NULL);
-    wednesday_btn = wf_add_button(weekday_container, countdown_get_week_day(3, true), day_btn_width, day_btn_height, NULL);
-    thursday_btn = wf_add_button(weekday_container, countdown_get_week_day(4, true), day_btn_width, day_btn_height, NULL);
-    friday_btn = wf_add_button(weekday_container, countdown_get_week_day(5, true), day_btn_width, day_btn_height, NULL);
-    saturday_btn = wf_add_button(weekday_container, countdown_get_week_day(6, true), day_btn_width, day_btn_height, NULL);
-    sunday_btn = wf_add_button(weekday_container, countdown_get_week_day(0, true), day_btn_width, day_btn_height, NULL);
-
     lv_obj_t *roller_container = wf_add_container(main_tile, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT, false, APP_STYLE );
     lv_obj_set_style_local_pad_left( roller_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, 1);
     lv_obj_set_style_local_pad_right( roller_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, 1);
-    lv_obj_align( roller_container, weekday_container, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
+    lv_obj_align( roller_container, countdown_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
 
     hour_roller = wf_add_roller( roller_container, get_roller_content(24, false, !clock_format_24), LV_ROLLER_MODE_INIFINITE, ROLLER_ROW_COUNT );
     lv_obj_set_width( hour_roller, 90 );
@@ -135,27 +115,13 @@ void countdown_main_set_data_to_display(rtcctl_alarm_t *countdown_data, bool clo
     else{
         lv_switch_off(countdown_enabled_switch, LV_ANIM_OFF);
     }
-    lv_btn_set_state(sunday_btn, countdown_data->week_days[0] ? LV_BTN_STATE_CHECKED_RELEASED : LV_BTN_STATE_RELEASED);
-    lv_btn_set_state(monday_btn, countdown_data->week_days[1] ? LV_BTN_STATE_CHECKED_RELEASED : LV_BTN_STATE_RELEASED);
-    lv_btn_set_state(tuesday_btn, countdown_data->week_days[2] ? LV_BTN_STATE_CHECKED_RELEASED : LV_BTN_STATE_RELEASED);
-    lv_btn_set_state(wednesday_btn, countdown_data->week_days[3] ? LV_BTN_STATE_CHECKED_RELEASED : LV_BTN_STATE_RELEASED);
-    lv_btn_set_state(thursday_btn, countdown_data->week_days[4] ? LV_BTN_STATE_CHECKED_RELEASED : LV_BTN_STATE_RELEASED);
-    lv_btn_set_state(friday_btn, countdown_data->week_days[5] ? LV_BTN_STATE_CHECKED_RELEASED : LV_BTN_STATE_RELEASED);
-    lv_btn_set_state(saturday_btn, countdown_data->week_days[6] ? LV_BTN_STATE_CHECKED_RELEASED : LV_BTN_STATE_RELEASED);
 }
 
 rtcctl_alarm_t *countdown_main_get_data_to_store(){
-    static rtcctl_alarm_t data;
+    static rtcctl_alarm_t data = {};
     data.enabled = lv_switch_get_state(countdown_enabled_switch);
     data.hour = lv_roller_get_selected(hour_roller);
     data.minute = lv_roller_get_selected(minute_roller);
-    data.week_days[0] = (lv_btn_get_state(sunday_btn) == LV_BTN_STATE_CHECKED_RELEASED);
-    data.week_days[1] = (lv_btn_get_state(monday_btn) == LV_BTN_STATE_CHECKED_RELEASED);
-    data.week_days[2] = (lv_btn_get_state(tuesday_btn) == LV_BTN_STATE_CHECKED_RELEASED);
-    data.week_days[3] = (lv_btn_get_state(wednesday_btn) == LV_BTN_STATE_CHECKED_RELEASED);
-    data.week_days[4] = (lv_btn_get_state(thursday_btn) == LV_BTN_STATE_CHECKED_RELEASED);
-    data.week_days[5] = (lv_btn_get_state(friday_btn) == LV_BTN_STATE_CHECKED_RELEASED);
-    data.week_days[6] = (lv_btn_get_state(saturday_btn) == LV_BTN_STATE_CHECKED_RELEASED);
     
     return &data;
 }
