@@ -30,12 +30,11 @@
 static lv_obj_t * vibe_switch = NULL;
 static lv_obj_t * fade_switch = NULL;
 static lv_obj_t * beep_switch = NULL;
-static lv_obj_t * main_tile_switch = NULL;
 
 void countdown_setup_setup( uint32_t tile_num ) {
     lv_obj_t *tile = mainbar_get_tile_obj( tile_num );
 
-    lv_obj_t *header = wf_add_settings_header( tile, "Alarm settings" );
+    lv_obj_t *header = wf_add_settings_header( tile, "Countdown settings" );
     lv_obj_align( header, tile, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
 
     lv_obj_t * vibe_onoff = wf_add_labeled_switch( tile, "Vibrate", &vibe_switch, true, NULL, SETUP_STYLE );
@@ -46,9 +45,6 @@ void countdown_setup_setup( uint32_t tile_num ) {
 
     lv_obj_t * beep_onoff = wf_add_labeled_switch( tile, "Beep", &beep_switch, true, NULL, SETUP_STYLE);
     lv_obj_align( beep_onoff, fade_onoff, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
-
-    lv_obj_t * show_onoff = wf_add_labeled_switch( tile, "Show on main tile", &main_tile_switch, true, NULL, SETUP_STYLE);
-    lv_obj_align( show_onoff, beep_onoff, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
 }
 
 static void set_switch_state(lv_obj_t *switch_obj, bool state){
@@ -71,8 +67,4 @@ countdown_properties_t *countdown_setup_get_data_to_store(){
     properties.fade = lv_switch_get_state(fade_switch);
     properties.beep = lv_switch_get_state(beep_switch);
     return &properties;
-}
-
-bool countdown_setup_is_main_tile_switch_on(){
-    return lv_switch_get_state(main_tile_switch);
 }

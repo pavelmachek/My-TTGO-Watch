@@ -127,6 +127,15 @@ void countdown_start(void)
 	//countdown_app_hide_app_icon_info( false );
 }
 
+void countdown_stop(void)
+{
+	lv_task_del(_countdown_app_task);
+	lv_obj_set_hidden(countdown_app_main_start_btn, false);
+	lv_obj_set_hidden(countdown_app_main_stop_btn, true);
+	countdown_remove_widget();
+	//countdown_app_hide_app_icon_info( true );
+}
+
 static void start_countdown_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	switch( event ) {
         case( LV_EVENT_CLICKED ):
@@ -138,11 +147,7 @@ static void start_countdown_app_main_event_cb( lv_obj_t * obj, lv_event_t event 
 static void stop_countdown_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	switch( event ) {
         case( LV_EVENT_CLICKED ):       // create an task that runs every secound
-		lv_task_del(_countdown_app_task);
-		lv_obj_set_hidden(countdown_app_main_start_btn, false);
-		lv_obj_set_hidden(countdown_app_main_stop_btn, true);
-		countdown_remove_widget();
-		//countdown_app_hide_app_icon_info( true );
+		countdown_stop();
 		break;
 	}
 }
