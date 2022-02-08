@@ -24,6 +24,7 @@
 #include "countdown.h"
 #include "countdown_main.h"
 #include "config/countdown_config.h"
+#include "done_in_progress.h"
 
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/mainbar.h"
@@ -31,6 +32,7 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 #include "hardware/rtcctl.h"
+
 
 lv_obj_t *countdown_app_main_start_btn = NULL;
 lv_obj_t *countdown_app_main_stop_btn = NULL;
@@ -72,19 +74,20 @@ static char* get_roller_content(int count, bool zeros, bool am_pm_roller){
 
 static void countdown_app_main_update_countdownlabel()
 {
-    //int hr = (countdown_milliseconds / (1000 * 60 * 60)) % 24;
-
     // minutes
     int min = (countdown_milliseconds / (1000 * 60)) % 60;
 
     // seconds
     int sec = (countdown_milliseconds / 1000) % 60;
 
-    // milliseconds
-    //int mill = countdown_milliseconds % 1000;
-
     char msg[10];
     sprintf(msg,"%02d:%02d", min, sec);
+
+    if (countdown_milliseconds < 0) {
+	    sprintf(msg, "DONE");
+
+	    done_in_progress_start_alarm();
+    }
 
     lv_label_set_text(countdown_app_main_countdownlabel, msg);
     lv_obj_align(countdown_app_main_countdownlabel, NULL, LV_ALIGN_CENTER, 0, 0);
