@@ -215,8 +215,8 @@ void countdown_main_setup( uint32_t tile_num ) {
 }
 
 void countdown_main_set_data_to_display(rtcctl_alarm_t *countdown_data, bool clock_24){
-    lv_roller_set_selected(hour_roller, 5, LV_ANIM_OFF);
-    lv_roller_set_selected(minute_roller, 0, LV_ANIM_OFF);
+    lv_roller_set_selected(hour_roller, 0, LV_ANIM_OFF);
+    lv_roller_set_selected(minute_roller, 10, LV_ANIM_OFF);
 }
 
 rtcctl_alarm_t *countdown_main_get_data_to_store(){

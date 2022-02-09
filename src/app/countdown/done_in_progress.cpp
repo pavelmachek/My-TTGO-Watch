@@ -77,6 +77,7 @@ static void exit_event_callback( lv_obj_t * obj, lv_event_t event ){
 static bool is_countdown_time(){
     time_t now;
     struct tm time_tm;
+    return true;
     time( &now );
     localtime_r( &now, &time_tm );
     return time_tm.tm_hour == rtcctl_get_alarm_data()->hour && time_tm.tm_min == rtcctl_get_alarm_data()->minute;
