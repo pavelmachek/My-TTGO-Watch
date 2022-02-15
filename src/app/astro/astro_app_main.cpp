@@ -87,7 +87,7 @@ void astro_app_main_setup( uint32_t tile_num ) {
     lv_obj_align( astro_cont, astro_app_main_tile, LV_ALIGN_CENTER, 0, 0 );
 
     astro_app_main_astrolabel = lv_label_create( astro_cont , NULL);
-    lv_label_set_text(astro_app_main_astrolabel, "(wait)");
+    lv_label_set_text(astro_app_main_astrolabel, "(press start)");
     lv_obj_reset_style_list( astro_app_main_astrolabel, LV_OBJ_PART_MAIN );
     lv_obj_add_style( astro_app_main_astrolabel, LV_OBJ_PART_MAIN, &astro_app_main_astrostyle );
     lv_obj_align(astro_app_main_astrolabel, NULL, LV_ALIGN_CENTER, 0, 0);

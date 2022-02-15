@@ -279,7 +279,11 @@ static void display(display_list *display, int num)
 	      else
 		    lv_obj_add_style( lvo, LV_OBJ_PART_MAIN, &web_main_style  );
 
+	      //void lv_label_set_long_mode(lv_obj_t*label, lv_label_long_mode_tlong_mode)
+	      //In LV_LONG_BREAK/LONG/ROLL the size of the label should be set AFTER this function
+	      lv_label_set_recolor(lvo, true);
 	      lv_label_set_text(lvo, l->text);
+	      
 	    } else {
 	      objects[i] = NULL;
 	      continue;
@@ -346,7 +350,7 @@ static void exit_big_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
 	    switch (y) {
 	    case 0 ... 2*S-1:
 		    state = S_ABOUT; display(d_about, sizeof(d_about)/sizeof(*d_about));
-		    display_html("(Old about here, should not be reached");
+		    display_html("(Old about here, should not be reached)");
 		    break;
 	    case 2*S ... 4*S-1:
 		    clear_screen();
@@ -817,6 +821,24 @@ void emit_text(char *start, char *end, int font, struct link this_link)
 	int lines = 0;
 	char tmp[1024];
 	char *out = tmp;
+
+	*out++ = '#';
+	if (!this_link.active) {
+		*out++ = 'f';
+		*out++ = 'f';
+		*out++ = 'f';
+		*out++ = 'f';
+		*out++ = 'f';
+		*out++ = 'f';
+	} else {
+		*out++ = '3';
+		*out++ = '0';
+		*out++ = '3';
+		*out++ = '0';
+		*out++ = 'f';
+		*out++ = 'f';
+	}
+	*out++ = ' ';
 	
 	if (font == S_SMALL)
 		limit = 28;
@@ -852,6 +874,7 @@ void emit_text(char *start, char *end, int font, struct link this_link)
 		*out++ = '\n';
 		lines++;
 	}
+	*out++ = '#';
 	*out++ = 0;
 	printf("Output: Have %d chars, %d lines, with link %s\n", end-start, lines, NN(this_link.dest));
 
