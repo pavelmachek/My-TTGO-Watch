@@ -38,18 +38,22 @@ void lua_test(void) {
     printf("cannot run configuration file: %s",
 	  lua_tostring(L, -1));
 #else
-  if (luaL_loadstring(L, "width = 42; height = 123") || lua_pcall(L, 0, 0, 0))
+  if (luaL_loadstring(L, "width = 42; height = 123; text = 'hello C'") || lua_pcall(L, 0, 0, 0))
     printf("cannot run configuration file: %s",
 	  lua_tostring(L, -1));
 #endif
-    
+
+  lua_getglobal(L, "text");
   lua_getglobal(L, "width");
   lua_getglobal(L, "height");
+  if (!lua_isstring(L, -3))
+    printf("`width' should be a number\n");
   if (!lua_isnumber(L, -2))
     printf("`width' should be a number\n");
   if (!lua_isnumber(L, -1))
     printf("`height' should be a number\n");
 
+  printf("Got text = %s\n", (char *)lua_tostring(L, -3));
   printf("Got width = %d\n", (int)lua_tonumber(L, -2));
   printf("Got height = %d\n", (int)lua_tonumber(L, -1));
     
