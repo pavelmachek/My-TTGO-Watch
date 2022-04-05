@@ -301,7 +301,15 @@ char *get_document(char *link)
 {
 	printf("Have link: %s\n", link);
 	if (!strcmp(link, "l:main"))
-		return "<small>Main menu</small><p><a href=\"l:about\">[About]</a><p><a href=\"l:weather\">[Weather]</a><p><a href=\"" WEB_SERVER "\">[Web]</a>";
+		return "<small>Main menu</small><p><a href=\"l:about\">[About]</a>"
+		       "<p><a href=\"l:weather\">[Weather]</a>"
+		       "<p><a href=\"l:lua\">[Lua]</a>"
+		       "<p><a href=\"" WEB_SERVER "\">[Web]</a>";
+	if (!strcmp(link, "l:lua")) {
+		printf("Running lua tests\n");
+		lua_test();
+		return "<p>See console";
+	}
 	if (!strcmp(link, "l:about"))
 		return "About watch<p><small>This is about document on a smartwatch. It shows how html is displayed.</small><p><a href=\"l:main\">[Done]</a>";
 	return "Something went wrong: unknown document.<p><a href=\"l:main\">[Back to main]</a>";
