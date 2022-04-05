@@ -1,3 +1,5 @@
+//#error foo
+#if 0
 /*
 ** $Id: luac.c $
 ** Lua compiler (saves bytecodes to files; also lists bytecodes)
@@ -723,3 +725,4 @@ static void PrintFunction(const Proto* f, int full)
  if (full) PrintDebug(f);
  for (i=0; i<n; i++) PrintFunction(f->p[i],full);
 }
+#endif

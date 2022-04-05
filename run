@@ -6,3 +6,4 @@ else
     nice platformio run && .pio/build/emulator_twatch2020/program
 fi
 # platformio run -t cleanall
+# nice platformio run -t clean

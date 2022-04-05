@@ -1,18 +1,26 @@
 #include <stdio.h>
 
-void lua_test(void) {}
-
 #if 0
+void lua_test(void) {}
+#endif
+
+#if 1
 extern "C" {
 #if 0
 #include "lua-on-arduino/src/lua/lua.h"
 #include "lua-on-arduino/src/lua/lualib.h"
 #include "lua-on-arduino/src/lua/lauxlib.h"
-#else
+#endif
+#if 0
 #include <lua5.3/lua.h>
 #include <lua5.3/lualib.h>
 #include <lua5.3/lauxlib.h>
-#endif  
+#endif
+#if 1
+#include "lua/src/lua.h"
+#include "lua/src/lualib.h"
+#include "lua/src/lauxlib.h"
+#endif
 }
 
 void lua_test(void) {
