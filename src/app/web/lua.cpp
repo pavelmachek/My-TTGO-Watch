@@ -4,6 +4,23 @@ extern "C" {
 #include "lua/src/lua.h"
 #include "lua/src/lualib.h"
 #include "lua/src/lauxlib.h"
+
+  static int c_getversion(lua_State *L)
+  {
+    double arg1 = luaL_checknumber (L, 1);
+
+    //push the results
+    lua_pushnumber(L, arg1 + 42);
+
+    //return number of results
+    return 1;
+  }
+}
+
+static void lua_add_callbacks(lua_State *L)
+{
+  lua_pushcfunction(L, c_getversion);
+  lua_setglobal(L, "c_getversion");
 }
 
 void lua_test(void) {
@@ -15,13 +32,15 @@ void lua_test(void) {
   luaopen_string(L);
   luaopen_math(L);
 
+  lua_add_callbacks(L);
+
   printf("Lua ready?\n");
 #if 0    
   if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0))
     printf("cannot run configuration file: %s",
 	  lua_tostring(L, -1));
 #else
-  if (luaL_loadstring(L, "width = 42; height = 123; text = 'hello C'") || lua_pcall(L, 0, 0, 0))
+  if (luaL_loadstring(L, "width = c_getversion(0); height = c_getversion(-42); text = 'hello C'") || lua_pcall(L, 0, 0, 0))
     printf("cannot run configuration file: %s",
 	  lua_tostring(L, -1));
 #endif
