@@ -22,6 +22,8 @@
 #include "widget_factory.h"
 #include "widget_styles.h"
 #include "mainbar/mainbar.h"
+#include "utils/alloc.h"
+#include <stdarg.h>
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -46,6 +48,7 @@
     LV_IMG_DECLARE(right_96px);
     LV_IMG_DECLARE(up_96px);
     LV_IMG_DECLARE(down_96px);
+    LV_IMG_DECLARE(location_96px);
 
     const lv_img_dsc_t down_icon = down_96px;
     const lv_img_dsc_t up_icon = up_96px;
@@ -63,6 +66,7 @@
     const lv_img_dsc_t exit_icon = exit_96px;
     const lv_img_dsc_t menu_icon = menu_96px;
     const lv_img_dsc_t refresh_icon = refresh_96px;
+    const lv_img_dsc_t location_icon = location_96px;
 #elif defined( MID_THEME )
     LV_IMG_DECLARE(menu_64px);
     LV_IMG_DECLARE(setup_64px);
@@ -80,6 +84,7 @@
     LV_IMG_DECLARE(right_64px);
     LV_IMG_DECLARE(up_64px);
     LV_IMG_DECLARE(down_64px);
+    LV_IMG_DECLARE(location_64px);
 
     const lv_img_dsc_t down_icon = down_64px;
     const lv_img_dsc_t up_icon = up_64px;
@@ -97,6 +102,7 @@
     const lv_img_dsc_t exit_icon = exit_64px;
     const lv_img_dsc_t menu_icon = menu_64px;
     const lv_img_dsc_t refresh_icon = refresh_64px;
+    const lv_img_dsc_t location_icon = location_64px;
 #else
     LV_IMG_DECLARE(menu_32px);
     LV_IMG_DECLARE(setup_32px);
@@ -114,6 +120,7 @@
     LV_IMG_DECLARE(right_32px);
     LV_IMG_DECLARE(up_32px);
     LV_IMG_DECLARE(down_32px);
+    LV_IMG_DECLARE(location_32px);
 
     const lv_img_dsc_t down_icon = down_32px;
     const lv_img_dsc_t up_icon = up_32px;
@@ -131,6 +138,7 @@
     const lv_img_dsc_t exit_icon = exit_32px;
     const lv_img_dsc_t menu_icon = menu_32px;
     const lv_img_dsc_t refresh_icon = refresh_32px;
+    const lv_img_dsc_t location_icon = location_32px;
 #endif
 
 #define CLICKABLE_PADDING 6
@@ -192,6 +200,21 @@ lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text, lv_style_t *style )
     else
         lv_obj_add_style( label, LV_OBJ_PART_MAIN, ws_get_label_style() );
     return label;
+}
+
+void wf_label_printf( lv_obj_t *label, lv_obj_t *base, lv_align_t align, lv_coord_t x, lv_coord_t y, const char *format, ... ) {
+    va_list args;
+    va_start(args, format);
+
+    char *buffer;
+    vasprintf( &buffer, format, args );
+    va_end(args);
+
+    lv_label_set_text( label, buffer );
+    lv_obj_align( label, base, align, x, y );
+
+    free( buffer );
+    return;
 }
 
 lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text) {
@@ -484,6 +507,13 @@ lv_obj_t * wf_add_down_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style
     return wf_add_image_button(parent, down_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
 }
 lv_img_dsc_t const &wf_get_down_img( void ) { return( down_icon ); }
+/**
+ * 
+ */
+lv_obj_t * wf_add_location_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
+    return wf_add_image_button(parent, location_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
+}
+lv_img_dsc_t const &wf_get_location_img( void ) { return( location_icon ); }
 
 
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn, lv_style_t *style ) {

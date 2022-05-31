@@ -38,6 +38,13 @@ Set color, background, touch feedback with vibrations...
 ![screenshot](images/display_1.png)
 ![screenshot](images/display_2.png)
 
+## Touch
+
+Touch calibration menu.
+
+![screenshot](images/touch1.png)
+![screenshot](images/touch2.png)
+
 ## Move
 
 Enable:
@@ -123,6 +130,8 @@ Here you can find some finish watchface packages:
 [![rainbow clock](images/watchface/rainbow/watchface_theme_prev.png)](images/watchface/rainbow/watchface.tar.gz)
 [![hal9000](images/watchface/hal9000/watchface_theme_prev.png)](images/watchface/hal9000/watchface.tar.gz)
 [![black](images/watchface/black/watchface_theme_prev.png)](images/watchface/black/watchface.tar.gz)
+
+alternative [watchfaces](https://github.com/PGNetHun/PG-TTGO-Watchfaces)
 
 # Applications
 
@@ -223,6 +232,14 @@ A long press in the middle centers the map to the current gps position.
 ![screenshot](images/screen6.png)
 
 In connection with [OsmAnd](https://osmand.net) the watch can also be used for navigation. Please use the osmand app, otherwise a lot of messages will be displayed.
+
+## gps tracker
+
+![screenshot](images/tracker1.png)
+![screenshot](images/tracker2.png)
+
+gps tracker that generates .gpx files. Only works properly with watches that have GPS. A long press on the crosshairs starts and stops the logging. The .gpx files can be downloaded via FTP and imported directly into e.g. GoogleMaps or OSM. The trash icon deletes all files to save space.
+
 
 ## Activity tracker
 

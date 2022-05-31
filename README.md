@@ -9,7 +9,7 @@
 
 # My-TTGO-Watch
 
-A GUI named hedge for smartwatch like devices based on ESP32. Currently support for T-Watch2020 (V1,V2,V3), T-Watch2021, M5Paper, M5Core2 and native Linux support for testing.
+A GUI named hedge for smartwatch like devices based on ESP32. Currently support for T-Watch2020 (V1,V2,V3), T-Watch2021 (currently broken), M5Paper, M5Core2 and native Linux support for testing.
 
 ## Features
 
@@ -57,28 +57,42 @@ If you are interested in native Linux support, please install sdl2, curl and mos
 sudo apt-get install libsdl2-dev libcurl4-gnutls-dev libmosquitto-dev build-essential
 ```
 
-# Telegram chatgroup
-
-Telegram chatgroup is here:
-https://t.me/TTGO_Watch
-
-# known issues
+# Known issues
 
 * the webserver crashes the ESP32 really often
 * the battery indicator is not accurate, rather a problem with the power management unit ( axp202 )
 
-# how to use
+## Development on the Windows platform
+
+The development tools have a known issue with the size of the project on Windows platforms. When the program is built you may receive the following error:
+
+    xtensa-esp32-elf-g++: error: CreateProcess: No such file or directory
+    *** [.pio\build\t-watch2020-v1\firmware.elf] Error 1
+
+This issue has not been seen on Linux or other platforms. If you must compile on Windows you may work around this linker issue by removing apps you do not use from the .\src\main.cpp file.
+
+You might remove the example app commenting out these lines by adding two slashes (```//```) on these locations:
+
+* main.cpp line 9:  ```//#include "app/example_app/example_app.h"```
+* main.cpp line 65: ```//  example_app_setup();```
+
+(Line numbers are approximate and may change as the system develops.)
+
+Since each app includes a different set of files, you may need to comment out several apps to reduce it small enough for the Windows build.
+
+# How to use
 
 Cf. [Usage](USAGE.md)
 
 # Forks that are recommended
 
+[Pickelhaupt](https://github.com/Pickelhaupt/EUC-Dash-ESP32)<br>
 [FantasyFactory](https://github.com/FantasyFactory/My-TTGO-Watch)<br>
 [NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)<br>
 [linuxthor](https://github.com/linuxthor/Hackers-TTGO-Watch)<br>
 [d03n3rfr1tz3](https://github.com/d03n3rfr1tz3/TTGO.T-Watch.2020)<br>
 
-# for the programmers
+# For the programmers
 
 Cf. [contribution guide](CONTRIBUTING.md)
 

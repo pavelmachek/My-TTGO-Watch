@@ -50,6 +50,7 @@
     #define     BACKGROUND_STYLE            ws_get_background_style()
     #define     MAINBAR_STYLE               ws_get_mainbar_style()
     #define     APP_STYLE                   ws_get_app_style()
+    #define     APP_OPA_STYLE               ws_get_app_opa_style()
     #define     APP_ICON_STYLE              ws_get_app_icon_style()
     #define     APP_ICON_LABEL_STYLE        ws_get_app_icon_label_style()
     #define     SETUP_STYLE                 ws_get_setup_tile_style()
@@ -111,6 +112,7 @@ lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text);
 lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text, lv_style_t *style );
 lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text);
 lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text, lv_style_t *style );
+void wf_label_printf( lv_obj_t *label, lv_obj_t *base, lv_align_t align, lv_coord_t x, lv_coord_t y, const char *format, ... );
 
 /**
  * @brief   Creates and adds a roller object to a container
@@ -362,6 +364,18 @@ lv_img_dsc_t const &wf_get_up_img( void );
  */
 lv_obj_t * wf_add_down_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style = NULL );
 lv_img_dsc_t const &wf_get_down_img( void );
+
+/**
+ * @brief   Creates and adds an down button to a container
+ *
+ * @param   parent   pointer to a parent container
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
+ *
+ * @return  returns pointer to the added object
+ */
+lv_obj_t * wf_add_location_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style = NULL );
+lv_img_dsc_t const &wf_get_location_img( void );
 
 /**
  * @brief   Creates and adds an labeled button to a container

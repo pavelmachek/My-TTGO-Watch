@@ -21,6 +21,7 @@
 #include "app/calendar/calendar.h"
 #include "app/weather/weather.h"
 #include "app/activity/activity.h"
+#include "app/tracker/tracker_app.h"
 #include "app/fx_rates/fx_rates.h"
 #include "app/IRController/IRController.h"
 #include "app/alarm_clock/alarm_clock.h"
@@ -56,6 +57,7 @@ void setup() {
     weather_app_setup();
     stopwatch_app_setup();
     astro_app_setup();
+    tracker_app_setup();
     alarm_clock_setup();
     countdown_setup();
     activity_app_setup();

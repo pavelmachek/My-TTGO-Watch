@@ -88,7 +88,8 @@ void display_setup( void ) {
      * register powermgm and pwermgm loop callback functions
      */
 //    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, display_powermgm_event_cb, "powermgm display" );
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, display_powermgm_event_cb, "powermgm display" );
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY, display_powermgm_event_cb, "powermgm display", CALL_CB_FIRST );
+    powermgm_register_cb_with_prio( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, display_powermgm_event_cb, "powermgm display", CALL_CB_LAST );
     powermgm_register_loop_cb( POWERMGM_WAKEUP, display_powermgm_loop_cb, "powermgm display loop" );
 }
 
@@ -345,7 +346,6 @@ void display_set_rotation( uint32_t rotation ) {
     #else
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
-            M5.Lcd.setRotation( rotation / 90 );
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             display_config.rotation = rotation;

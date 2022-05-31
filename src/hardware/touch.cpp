@@ -27,6 +27,8 @@
 #include "powermgm.h"
 #include "callback.h"
 
+touch_config_t touch_config;
+
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
     #include "indev/mouse.h"
@@ -85,6 +87,10 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg );
 bool touch_send_event_cb( EventBits_t event, void *arg );
 
 void touch_setup( void ) {
+    /**
+     * load touch config
+     */
+    touch_config.load();
 #ifdef NATIVE_64BIT
     /**
      * init SDL mouse
@@ -304,6 +310,24 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
     return( retval );
 }
 
+float touch_get_x_scale( void ) {
+    return( touch_config.x_scale );
+}
+
+float touch_get_y_scale( void ) {
+    return( touch_config.y_scale );
+}
+
+void touch_set_x_scale( float value ) {
+    touch_config.x_scale = value;
+    touch_config.save();
+}
+
+void touch_set_y_scale( float value ) {
+    touch_config.y_scale = value;
+    touch_config.save();
+}
+
 bool touch_getXY( int16_t &x, int16_t &y ) {
     
     /**
@@ -467,14 +491,6 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
                     touch_lock_give();
                 }
             }
-            /*
-            * issue https://github.com/sharandac/My-TTGO-Watch/issues/18 fix
-            */
-            float temp_x = ( data->point.x - ( lv_disp_get_hor_res( NULL ) / 2 ) ) * 1.15;
-            float temp_y = ( data->point.y - ( lv_disp_get_ver_res( NULL ) / 2 ) ) * 1.0;
-            data->point.x = temp_x + ( lv_disp_get_hor_res( NULL ) / 2 );
-            data->point.y = temp_y + ( lv_disp_get_ver_res( NULL ) / 2 );
-
         #elif defined( LILYGO_WATCH_2021 )
             bool isTouch = TouchSensor.getTouchType();
             data->state = isTouch ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
@@ -485,6 +501,25 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
             }
         #endif
     #endif
+    if( data->state == LV_INDEV_STATE_PR ) {
+        /*
+         * issue https://github.com/sharandac/My-TTGO-Watch/issues/18 fix
+         */
+        float temp_x = ( data->point.x - ( lv_disp_get_hor_res( NULL ) / 2 ) ) * touch_config.x_scale;
+        float temp_y = ( data->point.y - ( lv_disp_get_ver_res( NULL ) / 2 ) ) * touch_config.y_scale;
+        /**
+         * store correct value into data stucture
+         */
+        data->point.x = temp_x + ( lv_disp_get_hor_res( NULL ) / 2 );
+        data->point.y = temp_y + ( lv_disp_get_ver_res( NULL ) / 2 );
+    }
+    /**
+     * check limits
+     */
+    if( data->point.x < 0 ) data->point.x = 0;
+    if( data->point.x >= lv_disp_get_hor_res( NULL ) ) data->point.x = lv_disp_get_hor_res( NULL ) - 1;
+    if( data->point.y < 0 ) data->point.y = 0;
+    if( data->point.y >= lv_disp_get_ver_res( NULL ) ) data->point.y = lv_disp_get_ver_res( NULL ) - 1;
     /**
      * send touch event
      */
